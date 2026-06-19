@@ -780,7 +780,7 @@ class Player {
                 }
             }
         } 
-        else if (this.ninja) {
+        else if (this.charKey === 'ninja') {
             for (let i = 0; i < 15; i++) {
                 setTimeout(() => {
                     let rx = Math.random() * CANVAS_WIDTH;
@@ -1179,9 +1179,21 @@ function endGame() {
     showScreen('game-over-screen');
 }
 
+// 한글 키보드 매핑 테이블 (한영 전환 입력 잠금 버그 대응)
+const KOREAN_KEYS = {
+    'ㅁ': 'a', 'ㄴ': 's', 'ㅇ': 'd', 'ㅈ': 'w',
+    'ㅁ': 'A', 'ㄴ': 'S', 'ㅇ': 'D', 'ㅈ': 'W',
+    'ㄷ': 'e', 'ㄱ': 'r', 'ㄹ': 'f',
+    'ㄷ': 'E', 'ㄱ': 'R', 'ㄹ': 'F',
+    'ㅔ': 'p', 'ㅔ': 'P'
+};
+
 // Keyboard Listeners
 window.addEventListener('keydown', e => {
     keys[e.key] = true;
+    if (KOREAN_KEYS[e.key]) {
+        keys[KOREAN_KEYS[e.key]] = true;
+    }
     
     if (e.key.toLowerCase() === 'escape') {
         if (currentGameState === STATE.PLAYING) {
@@ -1196,6 +1208,9 @@ window.addEventListener('keydown', e => {
 
 window.addEventListener('keyup', e => {
     keys[e.key] = false;
+    if (KOREAN_KEYS[e.key]) {
+        keys[KOREAN_KEYS[e.key]] = false;
+    }
 });
 
 // Process player inputs
