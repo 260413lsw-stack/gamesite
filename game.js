@@ -69,7 +69,7 @@ const CHARACTER_PRESETS = {
         color: '#ff2d55',
         maxHp: 120,
         speed: 6.5 * 0.5, // 3.25
-        jumpForce: 15.5 * 0.5, // 7.75
+        jumpForce: 15.5, // 원래 점프력 복원
         basicDamage: 12,
         specialDamage: 22,
         ultDamage: 45,
@@ -83,7 +83,7 @@ const CHARACTER_PRESETS = {
         color: '#ff9500',
         maxHp: 90,
         speed: 5.0 * 0.5, // 2.5
-        jumpForce: 15.0 * 0.5, // 7.5
+        jumpForce: 15.0, // 원래 점프력 복원
         basicDamage: 10,
         specialDamage: 26,
         ultDamage: 50,
@@ -97,7 +97,7 @@ const CHARACTER_PRESETS = {
         color: '#4cd964',
         maxHp: 95,
         speed: 6.0 * 0.5, // 3.0
-        jumpForce: 16.0 * 0.5, // 8.0
+        jumpForce: 16.0, // 원래 점프력 복원
         basicDamage: 8,
         specialDamage: 18,
         ultDamage: 40,
@@ -111,7 +111,7 @@ const CHARACTER_PRESETS = {
         color: '#af52de',
         maxHp: 90,
         speed: 8.0 * 0.5, // 4.0
-        jumpForce: 17.5 * 0.5, // 8.75
+        jumpForce: 17.5, // 원래 점프력 복원
         basicDamage: 11,
         specialDamage: 20,
         ultDamage: 38,
@@ -125,7 +125,7 @@ const CHARACTER_PRESETS = {
         color: '#5ac8fa',
         maxHp: 110,
         speed: 6.0 * 0.5, // 3.0
-        jumpForce: 15.0 * 0.5, // 7.5
+        jumpForce: 15.0, // 원래 점프력 복원
         basicDamage: 13,
         specialDamage: 22,
         ultDamage: 42,
@@ -139,7 +139,7 @@ const CHARACTER_PRESETS = {
         color: '#ff3b30',
         maxHp: 140,
         speed: 5.5 * 0.5, // 2.75
-        jumpForce: 14.5 * 0.5, // 7.25
+        jumpForce: 14.5, // 원래 점프력 복원
         basicDamage: 15,
         specialDamage: 28,
         ultDamage: 52,
@@ -153,7 +153,7 @@ const CHARACTER_PRESETS = {
         color: '#ffcc00',
         maxHp: 85,
         speed: 5.5 * 0.5, // 2.75
-        jumpForce: 14.0 * 0.5, // 7.0
+        jumpForce: 14.0, // 원래 점프력 복원
         basicDamage: 7,
         specialDamage: 17,
         ultDamage: 38,
@@ -167,7 +167,7 @@ const CHARACTER_PRESETS = {
         color: '#8e8e93',
         maxHp: 90,
         speed: 7.5 * 0.5, // 3.75
-        jumpForce: 16.5 * 0.5, // 8.25
+        jumpForce: 16.5, // 원래 점프력 복원
         basicDamage: 9,
         specialDamage: 19,
         ultDamage: 38,
@@ -181,7 +181,7 @@ const CHARACTER_PRESETS = {
         color: '#e040fb',
         maxHp: 115,
         speed: 6.5 * 0.5, // 3.25
-        jumpForce: 15.0 * 0.5, // 7.5
+        jumpForce: 15.0, // 원래 점프력 복원
         basicDamage: 12,
         specialDamage: 22,
         ultDamage: 42,
@@ -195,7 +195,7 @@ const CHARACTER_PRESETS = {
         color: '#bf5af2',
         maxHp: 95,
         speed: 4.8 * 0.5, // 2.4
-        jumpForce: 14.5 * 0.5, // 7.25
+        jumpForce: 14.5, // 원래 점프력 복원
         basicDamage: 9,
         specialDamage: 22,
         ultDamage: 45,
@@ -209,7 +209,7 @@ const CHARACTER_PRESETS = {
         color: '#0a84ff',
         maxHp: 150,
         speed: 4.5 * 0.5, // 2.25
-        jumpForce: 14.0 * 0.5, // 7.0
+        jumpForce: 14.0, // 원래 점프력 복원
         basicDamage: 10,
         specialDamage: 18,
         ultDamage: 35,
@@ -223,7 +223,7 @@ const CHARACTER_PRESETS = {
         color: '#3a3a4c',
         maxHp: 105,
         speed: 5.5 * 0.5, // 2.75
-        jumpForce: 15.0 * 0.5, // 7.5
+        jumpForce: 15.0, // 원래 점프력 복원
         basicDamage: 14,
         specialDamage: 25,
         ultDamage: 45,
@@ -237,7 +237,7 @@ const CHARACTER_PRESETS = {
         color: '#ff2d55',
         maxHp: 100,
         speed: 6.0 * 0.5, // 3.0
-        jumpForce: 15.5 * 0.5, // 7.75
+        jumpForce: 15.5, // 원래 점프력 복원
         basicDamage: 10,
         specialDamage: 21,
         ultDamage: 40,
@@ -251,7 +251,7 @@ const CHARACTER_PRESETS = {
         color: '#30d158',
         maxHp: 95,
         speed: 5.0 * 0.5, // 2.5
-        jumpForce: 14.8 * 0.5, // 7.4
+        jumpForce: 14.8, // 원래 점프력 복원
         basicDamage: 8,
         specialDamage: 23,
         ultDamage: 38,
