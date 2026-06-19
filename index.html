@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bounce Attack - Premium Edition</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <div id="ui-layer">
+            <div id="sound-control">
+                <button id="bgm-toggle" class="icon-btn">🔊</button>
+            </div>
+            <div id="header">
+                <div class="player-info p1">
+                    <div class="name">PLAYER 1</div>
+                    <div class="hp-bar-container">
+                        <div id="p1-hp" class="hp-bar"></div>
+                        <div id="p1-hp-label" class="hp-label">100%</div>
+                    </div>
+                    <div class="ult-gauge-container">
+                        <div id="p1-ult" class="ult-gauge"></div>
+                    </div>
+                    <div class="skill-slots" id="p1-skills">
+                        <div class="skill-slot" id="p1-skill-basic">
+                            <span class="skill-icon">⚔️</span>
+                            <div id="p1-cd-basic" class="skill-cooldown-overlay"></div>
+                            <span class="skill-key">E</span>
+                        </div>
+                        <div class="skill-slot" id="p1-skill-special">
+                            <span class="skill-icon">🔥</span>
+                            <div id="p1-cd-special" class="skill-cooldown-overlay"></div>
+                            <span class="skill-key">R</span>
+                        </div>
+                        <div class="skill-slot" id="p1-skill-ult">
+                            <span class="skill-icon">✨</span>
+                            <div id="p1-cd-ult" class="skill-cooldown-overlay"></div>
+                            <span class="skill-key">F</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="timer">99</div>
+                <div class="player-info p2">
+                    <div class="name">PLAYER 2</div>
+                    <div class="hp-bar-container">
+                        <div id="p2-hp" class="hp-bar"></div>
+                        <div id="p2-hp-label" class="hp-label">100%</div>
+                    </div>
+                    <div class="ult-gauge-container">
+                        <div id="p2-ult" class="ult-gauge"></div>
+                    </div>
+                    <div class="skill-slots" id="p2-skills">
+                        <div class="skill-slot" id="p2-skill-basic">
+                            <span class="skill-icon">⚔️</span>
+                            <div id="p2-cd-basic" class="skill-cooldown-overlay"></div>
+                            <span class="skill-key">Enter</span>
+                        </div>
+                        <div class="skill-slot" id="p2-skill-special">
+                            <span class="skill-icon">🔥</span>
+                            <div id="p2-cd-special" class="skill-cooldown-overlay"></div>
+                            <span class="skill-key">P</span>
+                        </div>
+                        <div class="skill-slot" id="p2-skill-ult">
+                            <span class="skill-icon">✨</span>
+                            <div id="p2-cd-ult" class="skill-cooldown-overlay"></div>
+                            <span class="skill-key">Shift</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="menu-screen" class="screen active">
+                <h1 class="game-title">BOUNCE ATTACK</h1>
+                <p class="subtitle">PREMIUM EDITION</p>
+                <div class="menu-actions">
+                    <button id="start-btn" class="main-btn">GAME START</button>
+                    <button id="how-to-btn" class="secondary-btn">HOW TO PLAY</button>
+                </div>
+            </div>
+
+            <div id="character-select" class="screen">
+                <div class="selection-container">
+                    <div class="player-selection p1-side">
+                        <h3>PLAYER 1</h3>
+                        <div class="char-grid" id="p1-char-grid">
+                            <div class="char-card active" data-char="swordsman">
+                                <div class="char-icon">⚔️</div>
+                                <div class="char-name">SWORDSMAN</div>
+                            </div>
+                            <div class="char-card" data-char="mage">
+                                <div class="char-icon">🔥</div>
+                                <div class="char-name">MAGE</div>
+                            </div>
+                            <div class="char-card" data-char="archer">
+                                <div class="char-icon">🏹</div>
+                                <div class="char-name">ARCHER</div>
+                            </div>
+                            <div class="char-card" data-char="rogue">
+                                <div class="char-icon">🗡️</div>
+                                <div class="char-name">ROGUE</div>
+                            </div>
+                            <div class="char-card" data-char="lancer">
+                                <div class="char-icon">🔱</div>
+                                <div class="char-name">LANCER</div>
+                            </div>
+                            <div class="char-card" data-char="berserker">
+                                <div class="char-icon">🪓</div>
+                                <div class="char-name">BERSERKER</div>
+                            </div>
+                            <div class="char-card" data-char="gunner">
+                                <div class="char-icon">🔫</div>
+                                <div class="char-name">GUNNER</div>
+                            </div>
+                            <div class="char-card" data-char="ninja">
+                                <div class="char-icon">🥷</div>
+                                <div class="char-name">NINJA</div>
+                            </div>
+                            <div class="char-card" data-char="brawler">
+                                <div class="char-icon">🥊</div>
+                                <div class="char-name">BRAWLER</div>
+                            </div>
+                            <div class="char-card" data-char="necromancer">
+                                <div class="char-icon">💀</div>
+                                <div class="char-name">NECROMANCER</div>
+                            </div>
+                            <div class="char-card" data-char="paladin">
+                                <div class="char-icon">🛡️</div>
+                                <div class="char-name">PALADIN</div>
+                            </div>
+                            <div class="char-card" data-char="reaper">
+                                <div class="char-icon">🌑</div>
+                                <div class="char-name">REAPER</div>
+                            </div>
+                            <div class="char-card" data-char="vampire">
+                                <div class="char-icon">🧛</div>
+                                <div class="char-name">VAMPIRE</div>
+                            </div>
+                            <div class="char-card" data-char="alchemist">
+                                <div class="char-icon">🧪</div>
+                                <div class="char-name">ALCHEMIST</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="selection-divider"></div>
+
+                    <div class="player-selection p2-side">
+                        <h3>PLAYER 2</h3>
+                        <div class="char-grid" id="p2-char-grid">
+                            <div class="char-card" data-char="swordsman">
+                                <div class="char-icon">⚔️</div>
+                                <div class="char-name">SWORDSMAN</div>
+                            </div>
+                            <div class="char-card active" data-char="mage">
+                                <div class="char-icon">🔥</div>
+                                <div class="char-name">MAGE</div>
+                            </div>
+                            <div class="char-card" data-char="archer">
+                                <div class="char-icon">🏹</div>
+                                <div class="char-name">ARCHER</div>
+                            </div>
+                            <div class="char-card" data-char="rogue">
+                                <div class="char-icon">🗡️</div>
+                                <div class="char-name">ROGUE</div>
+                            </div>
+                            <div class="char-card" data-char="lancer">
+                                <div class="char-icon">🔱</div>
+                                <div class="char-name">LANCER</div>
+                            </div>
+                            <div class="char-card" data-char="berserker">
+                                <div class="char-icon">🪓</div>
+                                <div class="char-name">BERSERKER</div>
+                            </div>
+                            <div class="char-card" data-char="gunner">
+                                <div class="char-icon">🔫</div>
+                                <div class="char-name">GUNNER</div>
+                            </div>
+                            <div class="char-card" data-char="ninja">
+                                <div class="char-icon">🥷</div>
+                                <div class="char-name">NINJA</div>
+                            </div>
+                            <div class="char-card" data-char="brawler">
+                                <div class="char-icon">🥊</div>
+                                <div class="char-name">BRAWLER</div>
+                            </div>
+                            <div class="char-card" data-char="necromancer">
+                                <div class="char-icon">💀</div>
+                                <div class="char-name">NECROMANCER</div>
+                            </div>
+                            <div class="char-card" data-char="paladin">
+                                <div class="char-icon">🛡️</div>
+                                <div class="char-name">PALADIN</div>
+                            </div>
+                            <div class="char-card" data-char="reaper">
+                                <div class="char-icon">🌑</div>
+                                <div class="char-name">REAPER</div>
+                            </div>
+                            <div class="char-card" data-char="vampire">
+                                <div class="char-icon">🧛</div>
+                                <div class="char-name">VAMPIRE</div>
+                            </div>
+                            <div class="char-card" data-char="alchemist">
+                                <div class="char-icon">🧪</div>
+                                <div class="char-name">ALCHEMIST</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="confirm-char-btn" class="main-btn">FIGHT!</button>
+            </div>
+
+            <div id="map-select" class="screen">
+                <h2 class="section-title">CHOOSE BATTLEFIELD</h2>
+                <div class="map-grid">
+                    <div class="map-card active" data-map="cyber">
+                        <div class="map-preview cyber-bg"></div>
+                        <div class="map-name">CYBER CITY</div>
+                        <div class="map-desc">Neon-lit urban jungle with balanced platforms.</div>
+                    </div>
+                    <div class="map-card" data-map="sky">
+                        <div class="map-preview sky-bg"></div>
+                        <div class="map-name">SKY ISLAND</div>
+                        <div class="map-desc">High altitude duel. Watch your step!</div>
+                    </div>
+                    <div class="map-card" data-map="temple">
+                        <div class="map-preview temple-bg"></div>
+                        <div class="map-name">ANCIENT TEMPLE</div>
+                        <div class="map-desc">Solid ground and symmetrical stone structures.</div>
+                    </div>
+                </div>
+                <button id="start-game-btn" class="main-btn">NEXT</button>
+            </div>
+
+            <div id="how-to-screen" class="screen">
+                <h2>HOW TO PLAY</h2>
+                <div class="how-to-grid">
+                    <div class="p-controls">
+                        <h3>PLAYER 1</h3>
+                        <p>WASD: Move & Jump</p>
+                        <p>E: Attack</p>
+                        <p>R: Special Skill</p>
+                        <p>F: Ultimate</p>
+                    </div>
+                    <div class="p-controls">
+                        <h3>PLAYER 2</h3>
+                        <p>Arrows: Move & Jump</p>
+                        <p>Enter: Attack</p>
+                        <p>P: Special Skill</p>
+                        <p>Shift: Ultimate</p>
+                    </div>
+                </div>
+                <button id="close-how-btn" class="main-btn">GOT IT</button>
+            </div>
+
+            <div id="game-over-screen" class="screen">
+                <h2 id="winner-text">PLAYER 1 WINS!</h2>
+                <button id="restart-btn" class="main-btn">REPLAY</button>
+            </div>
+
+            <div id="pause-screen" class="screen">
+                <h2 class="section-title">PAUSED</h2>
+                <div class="menu-actions">
+                    <button id="resume-btn" class="main-btn">RESUME</button>
+                    <button id="quit-btn" class="secondary-btn">QUIT TO MENU</button>
+                </div>
+            </div>
+        </div>
+        <canvas id="game-canvas"></canvas>
+        <audio id="bgm" loop>
+            <source
+                src="https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Rolemusic/The_Black_N_White_Spirit/Rolemusic_-_03_-_The_Pirate_And_The_Dancer.mp3"
+                type="audio/mpeg">
+        </audio>
+    </div>
+    <script src="game.js"></script>
+</body>
+
+</html>
