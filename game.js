@@ -1,5 +1,5 @@
 // Bounce Attack - Premium Edition
-// Game Logic and Engine
+// Game Logic and Engine (Visual & Speed Upgrade Version)
 
 // --- 1. GAME CONSTANTS & STATE ---
 const CANVAS_WIDTH = 1024;
@@ -33,7 +33,7 @@ bgmToggle.addEventListener('click', () => {
         bgm.pause();
         bgmToggle.textContent = '🔇';
     } else {
-        bgm.play().catch(e => console.log("Audio play blocked by browser. Needs user interaction first."));
+        bgm.play().catch(e => console.log("Audio play blocked."));
         bgmToggle.textContent = '🔊';
     }
     bgmPlaying = !bgmPlaying;
@@ -45,20 +45,34 @@ function playBgm() {
     }
 }
 
+// Helper: Rounded Rectangle Drawing
+function drawRoundedRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+}
+
 // --- 3. CHARACTER CONFIGURATIONS ---
-// 모든 캐릭터의 이동 속도(speed)와 점프력(jumpForce)은 밸런스 패치에 따라 0.5배 축소 적용됨.
-// 기본 속도 기준치: 속도 6 -> 3.0, 점프력 16 -> 8.0, 중력 0.4
+// 모든 캐릭터의 이동 속도(speed)와 점프력(jumpForce)을 이전 0.5배 상태에서 1.5배 상승 적용 (= 원본 대비 0.75배로 조율)
 const CHARACTER_PRESETS = {
     swordsman: {
         name: 'SWORDSMAN',
         icon: '⚔️',
-        color: '#ff3b30',
+        color: '#ff2d55',
         maxHp: 120,
-        speed: 6.5 * 0.5, // 3.25
-        jumpForce: 15.5 * 0.5, // 7.75
+        speed: 6.5 * 0.75, // 4.875
+        jumpForce: 15.5 * 0.75, // 11.625
         basicDamage: 12,
         specialDamage: 22,
-        ultDamage: 40,
+        ultDamage: 45,
         basicCd: 400,
         specialCd: 1200,
         ultCd: 4000
@@ -68,39 +82,39 @@ const CHARACTER_PRESETS = {
         icon: '🔥',
         color: '#ff9500',
         maxHp: 90,
-        speed: 5.0 * 0.5, // 2.5
-        jumpForce: 15.0 * 0.5, // 7.5
+        speed: 5.0 * 0.75, // 3.75
+        jumpForce: 15.0 * 0.75, // 11.25
         basicDamage: 10,
-        specialDamage: 25,
-        ultDamage: 45,
-        basicCd: 600,
-        specialCd: 1500,
-        ultCd: 5000
+        specialDamage: 26,
+        ultDamage: 50,
+        basicCd: 500,
+        specialCd: 1400,
+        ultCd: 4800
     },
     archer: {
         name: 'ARCHER',
         icon: '🏹',
         color: '#4cd964',
         maxHp: 95,
-        speed: 6.0 * 0.5, // 3.0
-        jumpForce: 16.0 * 0.5, // 8.0
+        speed: 6.0 * 0.75, // 4.5
+        jumpForce: 16.0 * 0.75, // 12.0
         basicDamage: 8,
         specialDamage: 18,
-        ultDamage: 38,
-        basicCd: 500,
-        specialCd: 1300,
-        ultCd: 4500
+        ultDamage: 40,
+        basicCd: 450,
+        specialCd: 1200,
+        ultCd: 4200
     },
     rogue: {
         name: 'ROGUE',
         icon: '🗡️',
-        color: '#5856d6',
+        color: '#af52de',
         maxHp: 90,
-        speed: 8.0 * 0.5, // 4.0
-        jumpForce: 17.5 * 0.5, // 8.75
+        speed: 8.0 * 0.75, // 6.0
+        jumpForce: 17.5 * 0.75, // 13.125
         basicDamage: 11,
         specialDamage: 20,
-        ultDamage: 35,
+        ultDamage: 38,
         basicCd: 300,
         specialCd: 1000,
         ultCd: 3500
@@ -110,192 +124,196 @@ const CHARACTER_PRESETS = {
         icon: '🔱',
         color: '#5ac8fa',
         maxHp: 110,
-        speed: 6.0 * 0.5, // 3.0
-        jumpForce: 15.0 * 0.5, // 7.5
+        speed: 6.0 * 0.75, // 4.5
+        jumpForce: 15.0 * 0.75, // 11.25
         basicDamage: 13,
-        specialDamage: 21,
-        ultDamage: 38,
+        specialDamage: 22,
+        ultDamage: 42,
         basicCd: 500,
-        specialCd: 1400,
+        specialCd: 1300,
         ultCd: 4000
     },
     berserker: {
         name: 'BERSERKER',
         icon: '🪓',
-        color: '#ff2d55',
+        color: '#ff3b30',
         maxHp: 140,
-        speed: 5.5 * 0.5, // 2.75
-        jumpForce: 14.5 * 0.5, // 7.25
+        speed: 5.5 * 0.75, // 4.125
+        jumpForce: 14.5 * 0.75, // 10.875
         basicDamage: 15,
-        specialDamage: 26,
-        ultDamage: 48,
-        basicCd: 700,
-        specialCd: 1800,
-        ultCd: 5000
+        specialDamage: 28,
+        ultDamage: 52,
+        basicCd: 650,
+        specialCd: 1600,
+        ultCd: 4800
     },
     gunner: {
         name: 'GUNNER',
         icon: '🔫',
         color: '#ffcc00',
         maxHp: 85,
-        speed: 5.5 * 0.5, // 2.75
-        jumpForce: 14.0 * 0.5, // 7.0
+        speed: 5.5 * 0.75, // 4.125
+        jumpForce: 14.0 * 0.75, // 10.5
         basicDamage: 7,
-        specialDamage: 16,
-        ultDamage: 35,
-        basicCd: 250,
-        specialCd: 1100,
-        ultCd: 4000
+        specialDamage: 17,
+        ultDamage: 38,
+        basicCd: 220,
+        specialCd: 1000,
+        ultCd: 3800
     },
     ninja: {
         name: 'NINJA',
         icon: '🥷',
         color: '#8e8e93',
         maxHp: 90,
-        speed: 7.5 * 0.5, // 3.75
-        jumpForce: 16.5 * 0.5, // 8.25
+        speed: 7.5 * 0.75, // 5.625
+        jumpForce: 16.5 * 0.75, // 12.375
         basicDamage: 9,
-        specialDamage: 18,
-        ultDamage: 36,
-        basicCd: 350,
-        specialCd: 900,
-        ultCd: 3800
+        specialDamage: 19,
+        ultDamage: 38,
+        basicCd: 320,
+        specialCd: 850,
+        ultCd: 3600
     },
     brawler: {
         name: 'BRAWLER',
         icon: '🥊',
-        color: '#af52de',
+        color: '#e040fb',
         maxHp: 115,
-        speed: 6.5 * 0.5, // 3.25
-        jumpForce: 15.0 * 0.5, // 7.5
+        speed: 6.5 * 0.75, // 4.875
+        jumpForce: 15.0 * 0.75, // 11.25
         basicDamage: 12,
         specialDamage: 22,
-        ultDamage: 40,
-        basicCd: 400,
-        specialCd: 1200,
-        ultCd: 4200
+        ultDamage: 42,
+        basicCd: 380,
+        specialCd: 1100,
+        ultCd: 4000
     },
     necromancer: {
         name: 'NECROMANCER',
         icon: '💀',
-        color: '#a800ff',
+        color: '#bf5af2',
         maxHp: 95,
-        speed: 4.8 * 0.5, // 2.4
-        jumpForce: 14.5 * 0.5, // 7.25
+        speed: 4.8 * 0.75, // 3.6
+        jumpForce: 14.5 * 0.75, // 10.875
         basicDamage: 9,
-        specialDamage: 20,
-        ultDamage: 40,
-        basicCd: 650,
-        specialCd: 1600,
-        ultCd: 4800
+        specialDamage: 22,
+        ultDamage: 45,
+        basicCd: 600,
+        specialCd: 1500,
+        ultCd: 4600
     },
     paladin: {
         name: 'PALADIN',
         icon: '🛡️',
-        color: '#007aff',
+        color: '#0a84ff',
         maxHp: 150,
-        speed: 4.5 * 0.5, // 2.25
-        jumpForce: 14.0 * 0.5, // 7.0
+        speed: 4.5 * 0.75, // 3.375
+        jumpForce: 14.0 * 0.75, // 10.5
         basicDamage: 10,
         specialDamage: 18,
-        ultDamage: 32,
-        basicCd: 600,
-        specialCd: 2000,
-        ultCd: 5000
+        ultDamage: 35,
+        basicCd: 550,
+        specialCd: 1800,
+        ultCd: 4800
     },
     reaper: {
         name: 'REAPER',
         icon: '🌑',
-        color: '#1d1d26',
+        color: '#3a3a4c',
         maxHp: 105,
-        speed: 5.5 * 0.5, // 2.75
-        jumpForce: 15.0 * 0.5, // 7.5
+        speed: 5.5 * 0.75, // 4.125
+        jumpForce: 15.0 * 0.75, // 11.25
         basicDamage: 14,
-        specialDamage: 24,
-        ultDamage: 42,
-        basicCd: 600,
-        specialCd: 1400,
-        ultCd: 4500
+        specialDamage: 25,
+        ultDamage: 45,
+        basicCd: 550,
+        specialCd: 1300,
+        ultCd: 4200
     },
     vampire: {
         name: 'VAMPIRE',
         icon: '🧛',
-        color: '#ff2a6d',
+        color: '#ff2d55',
         maxHp: 100,
-        speed: 6.0 * 0.5, // 3.0
-        jumpForce: 15.5 * 0.5, // 7.75
+        speed: 6.0 * 0.75, // 4.5
+        jumpForce: 15.5 * 0.75, // 11.625
         basicDamage: 10,
-        specialDamage: 20,
-        ultDamage: 37,
-        basicCd: 500,
-        specialCd: 1300,
-        ultCd: 4300
+        specialDamage: 21,
+        ultDamage: 40,
+        basicCd: 450,
+        specialCd: 1200,
+        ultCd: 4000
     },
     alchemist: {
         name: 'ALCHEMIST',
         icon: '🧪',
-        color: '#05d9e8',
+        color: '#30d158',
         maxHp: 95,
-        speed: 5.0 * 0.5, // 2.5
-        jumpForce: 14.8 * 0.5, // 7.4
+        speed: 5.0 * 0.75, // 3.75
+        jumpForce: 14.8 * 0.75, // 11.1
         basicDamage: 8,
-        specialDamage: 22,
-        ultDamage: 36,
-        basicCd: 550,
-        specialCd: 1500,
-        ultCd: 4500
+        specialDamage: 23,
+        ultDamage: 38,
+        basicCd: 500,
+        specialCd: 1400,
+        ultCd: 4200
     }
 };
 
 // --- 4. MAP CONFIGURATIONS ---
+// 플랫폼 시인성 대폭 강화 및 고대비 색상 테마 적용
 const MAPS = {
     cyber: {
         background: '#040209',
+        gridColor: 'rgba(0, 255, 204, 0.12)', // 더 선명한 격자선
         platforms: [
-            { x: 0, y: 530, w: 1024, h: 46 }, // Ground
-            { x: 150, y: 400, w: 220, h: 15 },
-            { x: 654, y: 400, w: 220, h: 15 },
-            { x: 387, y: 280, w: 250, h: 15 }
+            { x: 0, y: 530, w: 1024, h: 46, border: '#00ffcc', fill: '#0a0915' },
+            { x: 150, y: 390, w: 220, h: 18, border: '#ff0055', fill: '#140510' },
+            { x: 654, y: 390, w: 220, h: 18, border: '#ff0055', fill: '#140510' },
+            { x: 387, y: 260, w: 250, h: 18, border: '#00ffcc', fill: '#0a0915' }
         ],
-        spawnP1: { x: 100, y: 450 },
-        spawnP2: { x: 924, y: 450 }
+        spawnP1: { x: 100, y: 440 },
+        spawnP2: { x: 924, y: 440 }
     },
     sky: {
-        background: '#0d1b2a',
+        background: '#04151f',
+        gridColor: 'rgba(255, 255, 255, 0.05)',
         platforms: [
-            { x: 162, y: 480, w: 700, h: 30 }, // Narrower Ground (Pitfalls on sides)
-            { x: 262, y: 350, w: 200, h: 15 },
-            { x: 562, y: 350, w: 200, h: 15 },
-            { x: 412, y: 220, w: 200, h: 15 }
+            { x: 162, y: 480, w: 700, h: 30, border: '#00e5ff', fill: '#0b202e' },
+            { x: 262, y: 340, w: 200, h: 18, border: '#4cd964', fill: '#0d2b18' },
+            { x: 562, y: 340, w: 200, h: 18, border: '#4cd964', fill: '#0d2b18' },
+            { x: 412, y: 200, w: 200, h: 18, border: '#ffcc00', fill: '#2b2308' }
         ],
-        spawnP1: { x: 250, y: 400 },
-        spawnP2: { x: 774, y: 400 }
+        spawnP1: { x: 250, y: 380 },
+        spawnP2: { x: 774, y: 380 }
     },
     temple: {
-        background: '#1b1b22',
+        background: '#0d0d12',
+        gridColor: 'rgba(255, 204, 0, 0.08)',
         platforms: [
-            { x: 0, y: 530, w: 1024, h: 46 }, // Ground
-            { x: 80, y: 410, w: 180, h: 20 },
-            { x: 764, y: 410, w: 180, h: 20 },
-            { x: 312, y: 300, w: 400, h: 20 }
+            { x: 0, y: 530, w: 1024, h: 46, border: '#ffaa00', fill: '#19150b' },
+            { x: 80, y: 400, w: 180, h: 22, border: '#007aff', fill: '#04101e' },
+            { x: 764, y: 400, w: 180, h: 22, border: '#007aff', fill: '#04101e' },
+            { x: 312, y: 280, w: 400, h: 22, border: '#ffffff', fill: '#1c1c24' }
         ],
-        spawnP1: { x: 100, y: 450 },
-        spawnP2: { x: 924, y: 450 }
+        spawnP1: { x: 100, y: 440 },
+        spawnP2: { x: 924, y: 440 }
     }
 };
 
-// --- 5. PARTICLE SYSTEM & PROJECTILE CLASSES ---
+// --- 5. PARTICLE SYSTEM & PROJECTILE CLASSES (Visual Glows Upgraded) ---
 class Particle {
-    constructor(x, y, color) {
+    constructor(x, y, color, speedScale = 1.0) {
         this.x = x;
         this.y = y;
         this.color = color;
-        this.size = Math.random() * 4 + 2;
-        this.speedX = (Math.random() - 0.5) * 8;
-        this.speedY = (Math.random() - 0.5) * 8 - 2;
-        this.gravity = 0.2;
+        this.size = Math.random() * 6 + 3; // 크기 증가
+        this.speedX = (Math.random() - 0.5) * 12 * speedScale;
+        this.speedY = (Math.random() - 0.5) * 12 * speedScale - 3;
+        this.gravity = 0.25;
         this.alpha = 1;
-        this.decay = Math.random() * 0.03 + 0.015;
+        this.decay = Math.random() * 0.02 + 0.01;
     }
 
     update() {
@@ -307,8 +325,10 @@ class Particle {
 
     draw(ctx) {
         ctx.save();
-        ctx.globalAlpha = this.alpha;
+        ctx.globalAlpha = Math.max(0, this.alpha);
         ctx.fillStyle = this.color;
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 12; // 빛 번짐 효과 강화
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
@@ -323,20 +343,20 @@ class Projectile {
         this.dx = dx;
         this.dy = dy;
         this.color = color;
-        this.size = size;
+        this.size = size * 1.5; // 투사체 크기 1.5배 증가 (가시성)
         this.speed = speed;
         this.damage = damage;
-        this.owner = owner; // 1 or 2
-        this.type = type; // 'normal', 'homing', 'bomb', 'absorb'
+        this.owner = owner; 
+        this.type = type; 
         this.target = trackingTarget;
-        this.life = 120; // Max frames
+        this.life = 150; 
     }
 
     update() {
         this.life--;
         if (this.type === 'homing' && this.target) {
-            let tx = this.target.x;
-            let ty = this.target.y - this.target.height/2;
+            let tx = this.target.x + this.target.width/2;
+            let ty = this.target.y + this.target.height/2;
             let angle = Math.atan2(ty - this.y, tx - this.x);
             this.dx = Math.cos(angle);
             this.dy = Math.sin(angle);
@@ -344,21 +364,32 @@ class Projectile {
         
         this.x += this.dx * this.speed;
         this.y += this.dy * this.speed;
+
+        // 투사체 이동 흔적(Particle Trail) 생성하여 화려함 추가
+        if (Math.random() < 0.4) {
+            particles.push(new Particle(this.x, this.y, this.color, 0.3));
+        }
     }
 
     draw(ctx) {
         ctx.save();
         ctx.fillStyle = this.color;
         ctx.shadowColor = this.color;
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 20; // 네온 가시성 극대화
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 투사체 중앙에 백색 코어를 넣어 훨씬 밝아보이도록 효과 연출
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * 0.4, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
     }
 }
 
-// --- 6. PLAYER CLASS & CORE PHYSICS ENGINE (A) ---
+// --- 6. PLAYER CLASS & PHYSICS ---
 class Player {
     constructor(id, x, y, charKey) {
         this.id = id;
@@ -367,44 +398,36 @@ class Player {
         this.charKey = charKey;
         this.config = CHARACTER_PRESETS[charKey];
         
-        this.width = 36;
-        this.height = 54;
+        this.width = 38;
+        this.height = 56;
         
-        // Dynamic stats
         this.hp = this.config.maxHp;
         this.maxHp = this.config.maxHp;
         this.ultGauge = 0;
         
-        // Movement physics
         this.vx = 0;
         this.vy = 0;
         this.isGrounded = false;
-        this.facing = id === 1 ? 1 : -1; // 1 = right, -1 = left
+        this.facing = id === 1 ? 1 : -1;
         this.doubleJumpUsed = false;
         
-        // Cooldowns (timestamps)
         this.cdBasicLast = 0;
         this.cdSpecialLast = 0;
         this.cdUltLast = 0;
         
-        // State
-        this.isShielded = false; // Paladin shield
+        this.isShielded = false;
         this.shieldDuration = 0;
-        this.isInvisible = false; // Rogue stealth
+        this.isInvisible = false;
         this.stealthDuration = 0;
-        this.berserkMode = false; // Berserker fury
+        this.berserkMode = false;
         this.berserkDuration = 0;
         
-        // Attack Box (melee)
         this.isAttacking = false;
         this.attackTimer = 0;
         this.attackBox = { x: 0, y: 0, w: 0, h: 0 };
     }
 
     update(platforms) {
-        const now = Date.now();
-        
-        // Handle custom states durations
         if (this.isShielded) {
             this.shieldDuration--;
             if (this.shieldDuration <= 0) this.isShielded = false;
@@ -418,14 +441,11 @@ class Player {
             if (this.berserkDuration <= 0) this.berserkMode = false;
         }
         
-        // Apply Gravity
-        const gravity = 0.35;
+        const gravity = 0.4;
         this.vy += gravity;
-        
-        // Move horizontally
         this.x += this.vx;
         
-        // Map wall collision (Horizontal)
+        // Wall boundaries
         if (this.x < 0) {
             this.x = 0;
             this.vx = 0;
@@ -434,7 +454,6 @@ class Player {
             this.vx = 0;
         }
         
-        // Move vertically
         this.y += this.vy;
         this.isGrounded = false;
 
@@ -442,9 +461,8 @@ class Player {
         for (let plat of platforms) {
             if (this.x + this.width > plat.x && 
                 this.x < plat.x + plat.w) {
-                // Check landing on platform
                 if (this.vy > 0 && 
-                    this.y + this.height - this.vy <= plat.y + 4 && 
+                    this.y + this.height - this.vy <= plat.y + 6 && 
                     this.y + this.height >= plat.y) {
                     this.y = plat.y - this.height;
                     this.vy = 0;
@@ -454,7 +472,6 @@ class Player {
             }
         }
         
-        // Melee attack box update
         if (this.isAttacking) {
             this.attackTimer--;
             if (this.attackTimer <= 0) {
@@ -462,7 +479,6 @@ class Player {
             }
         }
         
-        // Update Ult UI bar and HP bar
         this.updateUI();
     }
 
@@ -470,41 +486,32 @@ class Player {
         if (this.isGrounded) {
             this.vy = -this.config.jumpForce;
             this.isGrounded = false;
+            createHitParticles(this.x + this.width/2, this.y + this.height, '#ffffff', 8);
         } else if (this.charKey === 'ninja' && !this.doubleJumpUsed) {
-            // Ninja double jump feature
             this.vy = -this.config.jumpForce * 0.9;
             this.doubleJumpUsed = true;
-            createHitParticles(this.x + this.width/2, this.y + this.height, '#fff', 6);
+            createHitParticles(this.x + this.width/2, this.y + this.height, '#00ffff', 10);
         }
     }
 
     takeDamage(dmg) {
         if (this.isShielded) {
-            // Paladin shield block
-            createHitParticles(this.x + this.width/2, this.y + this.height/2, '#00ffff', 12);
+            createHitParticles(this.x + this.width/2, this.y + this.height/2, '#00e5ff', 15);
             return;
         }
         
-        // Rogue stealth ends upon taking damage
         if (this.isInvisible) {
             this.isInvisible = false;
         }
-        
-        // Berserker passive: lower HP increases damage output
-        let multiplier = 1;
-        if (this.charKey === 'berserker') {
-            multiplier = 1.3; // takes slightly more damage too
-        }
 
-        this.hp -= Math.round(dmg * multiplier);
-        if (this.hp < 0) this.hp = 0;
+        let dmgTaken = Math.round(dmg * (this.charKey === 'berserker' ? 1.25 : 1.0));
+        this.hp = Math.max(0, this.hp - dmgTaken);
         
-        // Build Ultimate meter upon taking damage
-        this.gainUlt(dmg * 0.5);
+        this.gainUlt(dmgTaken * 0.6);
+        screenShake = 10; // 흔들림 강화
         
-        // Visual effects
-        screenShake = 6;
-        createHitParticles(this.x + this.width/2, this.y + this.height/2, this.config.color, 10);
+        // 피격 시 캐릭터 고유 색상의 스파크 파티클 다수 뿜어냄
+        createHitParticles(this.x + this.width/2, this.y + this.height/2, this.config.color, 16);
     }
 
     gainUlt(amount) {
@@ -514,94 +521,81 @@ class Player {
     useBasicAttack(opponent) {
         const now = Date.now();
         let cd = this.config.basicCd;
-        if (this.berserkMode) cd *= 0.5; // Berserk attack rate
+        if (this.berserkMode) cd *= 0.5;
         
         if (now - this.cdBasicLast < cd) return;
         this.cdBasicLast = now;
         
         this.isAttacking = true;
-        this.attackTimer = 10; // Frames of active hitbox
+        this.attackTimer = 12;
         
-        // Define hitbox based on character class
+        // Melee hitbox calculation & triggering projectiles
         if (this.charKey === 'swordsman' || this.charKey === 'berserker' || this.charKey === 'brawler') {
-            // standard melee
             this.attackBox = {
-                x: this.facing === 1 ? this.x + this.width : this.x - 45,
-                y: this.y + 10,
-                w: 45,
-                h: this.height - 20
+                x: this.facing === 1 ? this.x + this.width : this.x - 55,
+                y: this.y + 6,
+                w: 55,
+                h: this.height - 12
             };
             checkMeleeHit(this, opponent, this.config.basicDamage);
         } else if (this.charKey === 'lancer') {
-            // long reach melee
             this.attackBox = {
-                x: this.facing === 1 ? this.x + this.width : this.x - 70,
-                y: this.y + 20,
-                w: 70,
-                h: 15
+                x: this.facing === 1 ? this.x + this.width : this.x - 85,
+                y: this.y + 18,
+                w: 85,
+                h: 18
             };
             checkMeleeHit(this, opponent, this.config.basicDamage);
         } else if (this.charKey === 'mage') {
-            // basic projectile fireball
-            let pX = this.facing === 1 ? this.x + this.width + 5 : this.x - 10;
-            projectiles.push(new Projectile(pX, this.y + 20, this.facing, 0, '#ff5500', 6, 8, this.config.basicDamage, this.id));
+            let pX = this.facing === 1 ? this.x + this.width + 10 : this.x - 15;
+            projectiles.push(new Projectile(pX, this.y + 22, this.facing, 0, '#ff5500', 8, 9, this.config.basicDamage, this.id));
         } else if (this.charKey === 'archer') {
-            // fast arrow projectile
-            let pX = this.facing === 1 ? this.x + this.width + 5 : this.x - 10;
-            projectiles.push(new Projectile(pX, this.y + 22, this.facing, 0, '#4cd964', 3, 12, this.config.basicDamage, this.id));
+            let pX = this.facing === 1 ? this.x + this.width + 10 : this.x - 15;
+            projectiles.push(new Projectile(pX, this.y + 22, this.facing, 0, '#4cd964', 4, 14, this.config.basicDamage, this.id));
         } else if (this.charKey === 'gunner') {
-            // bullet
-            let pX = this.facing === 1 ? this.x + this.width + 5 : this.x - 10;
-            projectiles.push(new Projectile(pX, this.y + 20, this.facing, 0, '#ffcc00', 4, 15, this.config.basicDamage, this.id));
+            let pX = this.facing === 1 ? this.x + this.width + 10 : this.x - 15;
+            projectiles.push(new Projectile(pX, this.y + 20, this.facing, 0, '#ffcc00', 5, 18, this.config.basicDamage, this.id));
         } else if (this.charKey === 'ninja') {
-            // shuriken
-            let pX = this.facing === 1 ? this.x + this.width + 5 : this.x - 10;
-            projectiles.push(new Projectile(pX, this.y + 20, this.facing, 0, '#8e8e93', 5, 10, this.config.basicDamage, this.id));
+            let pX = this.facing === 1 ? this.x + this.width + 10 : this.x - 15;
+            projectiles.push(new Projectile(pX, this.y + 20, this.facing, 0, '#8e8e93', 6, 12, this.config.basicDamage, this.id));
         } else if (this.charKey === 'necromancer') {
-            // ghost flame
-            let pX = this.facing === 1 ? this.x + this.width + 5 : this.x - 10;
-            projectiles.push(new Projectile(pX, this.y + 20, this.facing, 0, '#a800ff', 6, 6, this.config.basicDamage, this.id));
+            let pX = this.facing === 1 ? this.x + this.width + 10 : this.x - 15;
+            projectiles.push(new Projectile(pX, this.y + 20, this.facing, 0, '#bf5af2', 7, 7, this.config.basicDamage, this.id));
         } else if (this.charKey === 'paladin') {
-            // small shield bash melee
             this.attackBox = {
-                x: this.facing === 1 ? this.x + this.width : this.x - 30,
-                y: this.y + 5,
-                w: 30,
-                h: this.height - 10
+                x: this.facing === 1 ? this.x + this.width : this.x - 40,
+                y: this.y + 4,
+                w: 40,
+                h: this.height - 8
             };
             checkMeleeHit(this, opponent, this.config.basicDamage);
         } else if (this.charKey === 'reaper') {
-            // scythe sweep melee
             this.attackBox = {
-                x: this.facing === 1 ? this.x + this.width : this.x - 55,
+                x: this.facing === 1 ? this.x + this.width : this.x - 65,
                 y: this.y,
-                w: 55,
+                w: 65,
                 h: this.height
             };
             checkMeleeHit(this, opponent, this.config.basicDamage);
         } else if (this.charKey === 'vampire') {
-            // melee claw
             this.attackBox = {
-                x: this.facing === 1 ? this.x + this.width : this.x - 40,
-                y: this.y + 10,
-                w: 40,
-                h: this.height - 20
+                x: this.facing === 1 ? this.x + this.width : this.x - 50,
+                y: this.y + 8,
+                w: 50,
+                h: this.height - 16
             };
             if (checkMeleeHit(this, opponent, this.config.basicDamage)) {
-                // lifesteal
-                this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.basicDamage * 0.3));
+                this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.basicDamage * 0.35));
             }
         } else if (this.charKey === 'alchemist') {
-            // acid toss
-            let pX = this.facing === 1 ? this.x + this.width + 5 : this.x - 10;
-            projectiles.push(new Projectile(pX, this.y + 15, this.facing, -0.2, '#05d9e8', 5, 7, this.config.basicDamage, this.id));
+            let pX = this.facing === 1 ? this.x + this.width + 10 : this.x - 15;
+            projectiles.push(new Projectile(pX, this.y + 15, this.facing, -0.15, '#30d158', 6, 8, this.config.basicDamage, this.id));
         } else if (this.charKey === 'rogue') {
-            // quick backstab melee
             this.attackBox = {
-                x: this.facing === 1 ? this.x + this.width : this.x - 35,
-                y: this.y + 15,
-                w: 35,
-                h: this.height - 30
+                x: this.facing === 1 ? this.x + this.width : this.x - 45,
+                y: this.y + 12,
+                w: 45,
+                h: this.height - 24
             };
             checkMeleeHit(this, opponent, this.config.basicDamage);
         }
@@ -615,103 +609,88 @@ class Player {
         if (now - this.cdSpecialLast < this.config.specialCd) return;
         this.cdSpecialLast = now;
 
-        // Custom implementations for each Character
         if (this.charKey === 'swordsman') {
-            // Dash attack
-            this.vx = this.facing * 12;
+            this.vx = this.facing * 14;
             this.isAttacking = true;
             this.attackTimer = 15;
-            this.attackBox = { x: this.x - 10, y: this.y, w: this.width + 20, h: this.height };
+            this.attackBox = { x: this.x - 15, y: this.y, w: this.width + 30, h: this.height };
             checkMeleeHit(this, opponent, this.config.specialDamage);
         } 
         else if (this.charKey === 'mage') {
-            // Explosive Flame Burst (Area attack around player)
-            createExplosion(this.x + this.width/2, this.y + this.height/2, 100, '#ff5500');
+            createExplosion(this.x + this.width/2, this.y + this.height/2, 130, '#ff9500');
             let dist = Math.hypot((this.x + this.width/2) - (opponent.x + opponent.width/2), (this.y + this.height/2) - (opponent.y + opponent.height/2));
-            if (dist < 110) {
+            if (dist < 140) {
                 opponent.takeDamage(this.config.specialDamage);
-                opponent.vx = (opponent.x > this.x ? 1 : -1) * 8;
+                opponent.vx = (opponent.x > this.x ? 1 : -1) * 9;
             }
         } 
         else if (this.charKey === 'archer') {
-            // Multishot
-            let pX = this.facing === 1 ? this.x + this.width + 5 : this.x - 10;
-            projectiles.push(new Projectile(pX, this.y + 20, this.facing, -0.2, '#4cd964', 3, 10, this.config.specialDamage * 0.5, this.id));
-            projectiles.push(new Projectile(pX, this.y + 20, this.facing, 0, '#4cd964', 3, 10, this.config.specialDamage * 0.5, this.id));
-            projectiles.push(new Projectile(pX, this.y + 20, this.facing, 0.2, '#4cd964', 3, 10, this.config.specialDamage * 0.5, this.id));
+            let pX = this.facing === 1 ? this.x + this.width + 10 : this.x - 15;
+            projectiles.push(new Projectile(pX, this.y + 20, this.facing, -0.22, '#4cd964', 4, 11, this.config.specialDamage * 0.5, this.id));
+            projectiles.push(new Projectile(pX, this.y + 20, this.facing, 0, '#4cd964', 4, 11, this.config.specialDamage * 0.5, this.id));
+            projectiles.push(new Projectile(pX, this.y + 20, this.facing, 0.22, '#4cd964', 4, 11, this.config.specialDamage * 0.5, this.id));
         } 
         else if (this.charKey === 'rogue') {
-            // Stealth mode: Invisible and invincible for 2 seconds
             this.isInvisible = true;
-            this.stealthDuration = 120; // 120 frames = 2s
-            createHitParticles(this.x + this.width/2, this.y + this.height/2, '#5856d6', 15);
+            this.stealthDuration = 150; 
+            createHitParticles(this.x + this.width/2, this.y + this.height/2, '#af52de', 25);
         } 
         else if (this.charKey === 'lancer') {
-            // Vault jump (high mobility)
-            this.vy = -this.config.jumpForce * 1.5;
-            this.vx = this.facing * 5;
-            createHitParticles(this.x + this.width/2, this.y + this.height, '#5ac8fa', 10);
+            this.vy = -this.config.jumpForce * 1.4;
+            this.vx = this.facing * 6;
+            createHitParticles(this.x + this.width/2, this.y + this.height, '#5ac8fa', 15);
         } 
         else if (this.charKey === 'berserker') {
-            // Outrage: gain double speed and basic attack rate for 3 seconds
             this.berserkMode = true;
-            this.berserkDuration = 180;
-            createHitParticles(this.x + this.width/2, this.y + this.height/2, '#ff2d55', 20);
+            this.berserkDuration = 200;
+            createHitParticles(this.x + this.width/2, this.y + this.height/2, '#ff3b30', 30);
         } 
         else if (this.charKey === 'gunner') {
-            // Grenade launcher (deals explosive AOE damage)
-            let pX = this.facing === 1 ? this.x + this.width + 5 : this.x - 10;
-            projectiles.push(new Projectile(pX, this.y + 10, this.facing, -0.3, '#ffcc00', 8, 8, this.config.specialDamage, this.id, 'bomb'));
+            let pX = this.facing === 1 ? this.x + this.width + 10 : this.x - 15;
+            projectiles.push(new Projectile(pX, this.y + 10, this.facing, -0.25, '#ffcc00', 10, 9, this.config.specialDamage, this.id, 'bomb'));
         } 
         else if (this.charKey === 'ninja') {
-            // Teleport behind enemy and slash
             let oldX = this.x;
-            this.x = opponent.x - opponent.facing * 50;
+            this.x = opponent.x - opponent.facing * 60;
             this.facing = opponent.facing;
-            createHitParticles(oldX + this.width/2, this.y + this.height/2, '#8e8e93', 10);
-            createHitParticles(this.x + this.width/2, this.y + this.height/2, '#ff0055', 10);
+            createHitParticles(oldX + this.width/2, this.y + this.height/2, '#8e8e93', 15);
+            createHitParticles(this.x + this.width/2, this.y + this.height/2, '#ff2d55', 15);
             opponent.takeDamage(this.config.specialDamage);
         } 
         else if (this.charKey === 'brawler') {
-            // Uppercut (Launches enemy)
-            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 30, y: this.y - 20, w: 40, h: this.height + 20 };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 40, y: this.y - 25, w: 50, h: this.height + 25 };
             if (checkMeleeHit(this, opponent, this.config.specialDamage)) {
-                opponent.vy = -12;
-                opponent.vx = this.facing * 3;
+                opponent.vy = -13;
+                opponent.vx = this.facing * 4;
             }
         } 
         else if (this.charKey === 'necromancer') {
-            // Summon Homing Ghost Spark
-            let pX = this.facing === 1 ? this.x + this.width : this.x - 10;
-            projectiles.push(new Projectile(pX, this.y + 10, this.facing, 0, '#a800ff', 7, 5, this.config.specialDamage, this.id, 'homing', opponent));
+            let pX = this.facing === 1 ? this.x + this.width : this.x - 15;
+            projectiles.push(new Projectile(pX, this.y + 10, this.facing, 0, '#bf5af2', 9, 6, this.config.specialDamage, this.id, 'homing', opponent));
         } 
         else if (this.charKey === 'paladin') {
-            // Holy Shield barrier (Absorbs damage for 2.5s)
             this.isShielded = true;
-            this.shieldDuration = 150;
-            createHitParticles(this.x + this.width/2, this.y + this.height/2, '#007aff', 15);
+            this.shieldDuration = 180;
+            createHitParticles(this.x + this.width/2, this.y + this.height/2, '#0a84ff', 25);
         } 
         else if (this.charKey === 'reaper') {
-            // Life Drain Ray
-            let pX = this.facing === 1 ? this.x + this.width : this.x - 10;
-            projectiles.push(new Projectile(pX, this.y + 20, this.facing, 0, '#1d1d26', 10, 6, this.config.specialDamage, this.id, 'absorb', opponent));
+            let pX = this.facing === 1 ? this.x + this.width : this.x - 15;
+            projectiles.push(new Projectile(pX, this.y + 20, this.facing, 0, '#3a3a4c', 12, 7, this.config.specialDamage, this.id, 'absorb', opponent));
         } 
         else if (this.charKey === 'vampire') {
-            // Vampire Bat dash
-            this.vx = this.facing * 14;
-            createHitParticles(this.x + this.width/2, this.y + this.height/2, '#ff2a6d', 12);
-            if (Math.abs(this.x - opponent.x) < 80 && Math.abs(this.y - opponent.y) < 50) {
+            this.vx = this.facing * 16;
+            createHitParticles(this.x + this.width/2, this.y + this.height/2, '#ff2d55', 20);
+            if (Math.abs(this.x - opponent.x) < 95 && Math.abs(this.y - opponent.y) < 60) {
                 opponent.takeDamage(this.config.specialDamage);
-                this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.specialDamage * 0.5)); // Heal 50%
+                this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.specialDamage * 0.55));
             }
         } 
         else if (this.charKey === 'alchemist') {
-            // Toxic Brew (leaves poison pool on floor)
-            let pX = this.facing === 1 ? this.x + this.width : this.x - 10;
-            projectiles.push(new Projectile(pX, this.y, this.facing, -0.4, '#05d9e8', 6, 7, this.config.specialDamage, this.id, 'poison'));
+            let pX = this.facing === 1 ? this.x + this.width : this.x - 15;
+            projectiles.push(new Projectile(pX, this.y, this.facing, -0.35, '#30d158', 8, 8, this.config.specialDamage, this.id, 'bomb'));
         }
 
-        this.gainUlt(15);
+        this.gainUlt(16);
         triggerCooldownUI(this.id, 'special', this.config.specialCd);
     }
 
@@ -719,80 +698,71 @@ class Player {
         if (this.ultGauge < 100) return;
         this.ultGauge = 0;
         
-        screenShake = 15;
+        screenShake = 22; // 궁극기 시전 시 화면 진동 대폭 증가 (박진감)
 
-        // Custom Ultimates
         if (this.charKey === 'swordsman') {
-            // Omnislash
-            for(let i=0; i<6; i++) {
+            for(let i=0; i<7; i++) {
                 setTimeout(() => {
-                    this.x = opponent.x + (Math.random() - 0.5) * 80;
-                    this.y = opponent.y - 10;
-                    opponent.takeDamage(this.config.ultDamage / 6);
-                    createHitParticles(opponent.x + opponent.width/2, opponent.y + opponent.height/2, this.config.color, 12);
-                }, i * 150);
+                    this.x = opponent.x + (Math.random() - 0.5) * 100;
+                    this.y = opponent.y - 15;
+                    opponent.takeDamage(this.config.ultDamage / 7);
+                    createHitParticles(opponent.x + opponent.width/2, opponent.y + opponent.height/2, '#ff2d55', 15);
+                }, i * 140);
             }
         } 
         else if (this.charKey === 'mage') {
-            // Apocalypse Meteor
             let pX = opponent.x;
-            projectiles.push(new Projectile(pX, 0, 0, 1, '#ff3b30', 25, 6, this.config.ultDamage, this.id, 'bomb'));
+            projectiles.push(new Projectile(pX, 0, 0, 1, '#ff3b30', 32, 7, this.config.ultDamage, this.id, 'bomb'));
         } 
         else if (this.charKey === 'archer') {
-            // Arrow Storm (multiple high speed arrows)
-            for(let i=0; i<8; i++) {
+            for(let i=0; i<10; i++) {
                 setTimeout(() => {
-                    let pX = this.facing === 1 ? this.x + this.width : this.x - 10;
-                    projectiles.push(new Projectile(pX, this.y + 10 + (Math.random()-0.5)*30, this.facing, (Math.random()-0.5)*0.3, '#4cd964', 3, 16, this.config.ultDamage / 8, this.id));
-                }, i * 80);
+                    let pX = this.facing === 1 ? this.x + this.width : this.x - 15;
+                    projectiles.push(new Projectile(pX, this.y + 10 + (Math.random()-0.5)*40, this.facing, (Math.random()-0.5)*0.25, '#4cd964', 4, 18, this.config.ultDamage / 10, this.id));
+                }, i * 70);
             }
         } 
         else if (this.charKey === 'rogue') {
-            // Execution Shadow Strike (Instant massive dash pierce)
-            this.vx = this.facing * 25;
+            this.vx = this.facing * 28;
             this.y = opponent.y;
             setTimeout(() => {
                 let dist = Math.hypot(this.x - opponent.x, this.y - opponent.y);
-                if (dist < 150) {
+                if (dist < 180) {
                     opponent.takeDamage(this.config.ultDamage);
-                    createHitParticles(opponent.x + opponent.width/2, opponent.y + opponent.height/2, '#5856d6', 30);
+                    createHitParticles(opponent.x + opponent.width/2, opponent.y + opponent.height/2, '#af52de', 35);
                 }
-            }, 100);
+            }, 90);
         } 
         else if (this.charKey === 'lancer') {
-            // Dragon Spike (Jump high and crash down)
-            this.vy = -18;
+            this.vy = -20;
             setTimeout(() => {
-                this.vy = 22;
+                this.vy = 24;
                 let checkLand = setInterval(() => {
-                    if (this.isGrounded || this.y >= 500) {
+                    if (this.isGrounded || this.y >= 490) {
                         clearInterval(checkLand);
-                        createExplosion(this.x + this.width/2, this.y + this.height, 130, '#5ac8fa');
+                        createExplosion(this.x + this.width/2, this.y + this.height, 160, '#5ac8fa');
                         let dist = Math.hypot((this.x + this.width/2) - (opponent.x + opponent.width/2), (this.y + this.height) - (opponent.y + opponent.height));
-                        if (dist < 150) {
+                        if (dist < 180) {
                             opponent.takeDamage(this.config.ultDamage);
-                            opponent.vy = -10;
+                            opponent.vy = -12;
                         }
                     }
                 }, 1000/60);
-            }, 350);
+            }, 300);
         } 
         else if (this.charKey === 'berserker') {
-            // Rupture Shockwave
-            createExplosion(this.x + this.width/2, this.y + this.height, 120, '#ff2d55');
+            createExplosion(this.x + this.width/2, this.y + this.height, 140, '#ff3b30');
             let dist = Math.hypot(this.x - opponent.x, this.y - opponent.y);
-            if (dist < 200) {
+            if (dist < 220) {
                 opponent.takeDamage(this.config.ultDamage);
-                opponent.vx = (opponent.x > this.x ? 1 : -1) * 15;
-                opponent.vy = -6;
+                opponent.vx = (opponent.x > this.x ? 1 : -1) * 18;
+                opponent.vy = -7;
             }
         } 
         else if (this.charKey === 'gunner') {
-            // Full Burst Laser Ray (Continuous direct damage beam)
             let beamX = this.facing === 1 ? this.x + this.width : 0;
             let beamW = this.facing === 1 ? CANVAS_WIDTH - beamX : this.x;
             
-            // Draw visual beam
             projectiles.push({
                 x: beamX + beamW/2,
                 y: this.y + 20,
@@ -800,80 +770,74 @@ class Player {
                     ctx.save();
                     ctx.fillStyle = '#ffcc00';
                     ctx.shadowColor = '#ffcc00';
-                    ctx.shadowBlur = 20;
-                    ctx.fillRect(this.facing === 1 ? beamX : 0, this.y - 10, beamW, 20);
+                    ctx.shadowBlur = 30; // 굵기 및 발광 강화
+                    ctx.fillRect(this.facing === 1 ? beamX : 0, this.y - 15, beamW, 30);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(this.facing === 1 ? beamX : 0, this.y - 5, beamW, 10);
                     ctx.restore();
                 },
                 update: function() {},
-                life: 20,
+                life: 25,
                 owner: this.id
             });
 
-            // Check hit
-            if (opponent.y + opponent.height > this.y + 10 && opponent.y < this.y + 30) {
+            if (opponent.y + opponent.height > this.y + 5 && opponent.y < this.y + 35) {
                 if ((this.facing === 1 && opponent.x > this.x) || (this.facing === -1 && opponent.x < this.x)) {
                     opponent.takeDamage(this.config.ultDamage);
-                    opponent.vx = this.facing * 10;
+                    opponent.vx = this.facing * 12;
                 }
             }
         } 
         else if (this.charKey === 'ninja') {
-            // Shadow Clone Storm (Spawns 수리검 from all directions)
-            for (let i = 0; i < 12; i++) {
+            for (let i = 0; i < 15; i++) {
                 setTimeout(() => {
                     let rx = Math.random() * CANVAS_WIDTH;
                     let angle = Math.atan2(opponent.y - 50, rx - opponent.x);
-                    projectiles.push(new Projectile(rx, 50, -Math.cos(angle), -Math.sin(angle), '#8e8e93', 5, 12, this.config.ultDamage / 12, this.id));
-                }, i * 80);
+                    projectiles.push(new Projectile(rx, 50, -Math.cos(angle), -Math.sin(angle), '#8e8e93', 6, 14, this.config.ultDamage / 15, this.id));
+                }, i * 70);
             }
         } 
         else if (this.charKey === 'brawler') {
-            // Fist Storm Combo
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 6; i++) {
                 setTimeout(() => {
-                    this.vx = this.facing * 6;
-                    this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 50, y: this.y, w: 50, h: this.height };
-                    checkMeleeHit(this, opponent, this.config.ultDamage / 5);
-                }, i * 120);
+                    this.vx = this.facing * 7;
+                    this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 60, y: this.y, w: 60, h: this.height };
+                    checkMeleeHit(this, opponent, this.config.ultDamage / 6);
+                }, i * 100);
             }
         } 
         else if (this.charKey === 'necromancer') {
-            // Death Summon: Spawns 3 tracking skulls
-            for(let i = 0; i < 3; i++) {
+            for(let i = 0; i < 4; i++) {
                 setTimeout(() => {
-                    projectiles.push(new Projectile(this.x + this.width/2, this.y, this.facing, -0.5 + (i*0.5), '#a800ff', 10, 5, this.config.ultDamage/3, this.id, 'homing', opponent));
-                }, i * 200);
+                    projectiles.push(new Projectile(this.x + this.width/2, this.y, this.facing, -0.6 + (i*0.4), '#bf5af2', 12, 6, this.config.ultDamage/4, this.id, 'homing', opponent));
+                }, i * 160);
             }
         } 
         else if (this.charKey === 'paladin') {
-            // Divine Judgement (Sacred pillar of light)
-            createExplosion(opponent.x + opponent.width/2, opponent.y + opponent.height/2, 80, '#007aff');
+            createExplosion(opponent.x + opponent.width/2, opponent.y + opponent.height/2, 100, '#0a84ff');
             opponent.takeDamage(this.config.ultDamage);
-            opponent.vy = 10; // Smite down
+            opponent.vy = 12;
         } 
         else if (this.charKey === 'reaper') {
-            // Grim Reaper scythe sweep (deals massive dmg if opponent under 40% HP)
             let baseDmg = this.config.ultDamage;
             if (opponent.hp / opponent.maxHp < 0.4) {
-                baseDmg *= 1.8; // Execution damage bonus!
-                createHitParticles(opponent.x + opponent.width/2, opponent.y + opponent.height/2, '#ff0055', 30);
+                baseDmg *= 2.0; 
+                createHitParticles(opponent.x + opponent.width/2, opponent.y + opponent.height/2, '#ff0055', 40);
             }
-            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 80, y: this.y - 10, w: 80, h: this.height + 20 };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 90, y: this.y - 15, w: 90, h: this.height + 30 };
             checkMeleeHit(this, opponent, baseDmg);
         } 
         else if (this.charKey === 'vampire') {
-            // Blood Thirst Area absorption
-            createExplosion(this.x + this.width/2, this.y + this.height/2, 160, '#ff2a6d');
+            createExplosion(this.x + this.width/2, this.y + this.height/2, 180, '#ff2d55');
             let dist = Math.hypot((this.x + this.width/2) - (opponent.x + opponent.width/2), (this.y + this.height/2) - (opponent.y + opponent.height/2));
-            if (dist < 170) {
+            if (dist < 190) {
                 opponent.takeDamage(this.config.ultDamage);
-                this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.ultDamage * 0.7)); // huge heal
+                this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.ultDamage * 0.75));
             }
         } 
         else if (this.charKey === 'alchemist') {
-            // Philosopher's Bomb: Large toxic gas cloud
-            let pX = this.facing === 1 ? this.x + this.width : this.x - 10;
-            projectiles.push(new Projectile(pX, this.y + 10, this.facing, -0.2, '#05d9e8', 15, 6, this.config.ultDamage, this.id, 'bomb'));
+            let pX = this.facing === 1 ? this.x + this.width : this.x - 15;
+            projectiles.push(new Projectile(pX, this.y + 10, this.facing, -0.18, '#30d158', 18, 7, this.config.ultDamage, this.id, 'bomb'));
         }
 
         triggerCooldownUI(this.id, 'ult', this.config.ultCd);
@@ -889,43 +853,75 @@ class Player {
     draw(ctx) {
         if (this.isInvisible) {
             ctx.save();
-            ctx.globalAlpha = 0.25; // Translucent
+            ctx.globalAlpha = 0.22;
         }
 
-        // Draw Player body
-        ctx.fillStyle = this.config.color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.save();
+        // 1. 캐릭터 네온 글로우 섀도우 효과 부여
+        ctx.shadowColor = this.config.color;
+        ctx.shadowBlur = 18;
         
-        // Draw Eyes/Face to indicate facing direction
-        ctx.fillStyle = '#fff';
-        let eyeOffset = this.facing === 1 ? 24 : 6;
+        // 2. 캐릭터 바디 그라데이션 적용 (밋밋함 제거)
+        let grad = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
+        grad.addColorStop(0, this.config.color);
+        grad.addColorStop(0.7, this.config.color);
+        grad.addColorStop(1, '#0e0a16');
+        ctx.fillStyle = grad;
+        
+        // 둥근 모서리형 바디 드로잉
+        drawRoundedRect(ctx, this.x, this.y, this.width, this.height, 8);
+        ctx.fill();
+        
+        // 테두리 선명한 스트로크 추가
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        drawRoundedRect(ctx, this.x, this.y, this.width, this.height, 8);
+        ctx.stroke();
+        ctx.restore();
+        
+        // 방향 지시 안구 그래픽
+        ctx.fillStyle = '#ffffff';
+        let eyeOffset = this.facing === 1 ? 26 : 6;
         ctx.fillRect(this.x + eyeOffset, this.y + 12, 6, 6);
-        ctx.fillStyle = '#000';
-        let pupOffset = this.facing === 1 ? 26 : 6;
+        ctx.fillStyle = '#000000';
+        let pupOffset = this.facing === 1 ? 28 : 6;
         ctx.fillRect(this.x + pupOffset, this.y + 12, 4, 6);
         
-        // Shield aura visual
+        // 실드 상태 이펙트 강화 (선명한 하늘색 원형 실드)
         if (this.isShielded) {
-            ctx.strokeStyle = '#00ffff';
+            ctx.save();
+            ctx.strokeStyle = '#00e5ff';
+            ctx.shadowColor = '#00e5ff';
+            ctx.shadowBlur = 15;
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.arc(this.x + this.width/2, this.y + this.height/2, this.height/2 + 6, 0, Math.PI*2);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // 폭주(버서크) 이펙트 강화
+        if (this.berserkMode) {
+            ctx.save();
+            ctx.strokeStyle = '#ff3b30';
+            ctx.shadowColor = '#ff3b30';
+            ctx.shadowBlur = 15;
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.arc(this.x + this.width/2, this.y + this.height/2, this.height/2 + 5, 0, Math.PI*2);
+            ctx.arc(this.x + this.width/2, this.y + this.height/2, this.height/2 + 4, 0, Math.PI*2);
             ctx.stroke();
+            ctx.restore();
         }
 
-        // Berserk aura visual
-        if (this.berserkMode) {
-            ctx.strokeStyle = '#ff0055';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(this.x + this.width/2, this.y + this.height/2, this.height/2 + 3, 0, Math.PI*2);
-            ctx.stroke();
-        }
-
-        // Draw Melee Attack Range Box (during attack for debugging/visual effect)
+        // 근접 물리 히트박스 영역 가시적 표시 (검 베기 등)
         if (this.isAttacking && (this.charKey === 'swordsman' || this.charKey === 'berserker' || this.charKey === 'brawler' || this.charKey === 'lancer' || this.charKey === 'paladin' || this.charKey === 'reaper' || this.charKey === 'vampire' || this.charKey === 'rogue')) {
-            ctx.fillStyle = `rgba(${parseInt(this.config.color.slice(1,3), 16) || 255}, 0, 0, 0.3)`;
+            ctx.save();
+            ctx.fillStyle = this.config.color;
+            ctx.globalAlpha = 0.45;
+            ctx.shadowColor = this.config.color;
+            ctx.shadowBlur = 15;
             ctx.fillRect(this.attackBox.x, this.attackBox.y, this.attackBox.w, this.attackBox.h);
+            ctx.restore();
         }
 
         if (this.isInvisible) {
@@ -942,7 +938,7 @@ function checkMeleeHit(attacker, defender, damage) {
         attacker.attackBox.y + attacker.attackBox.h > defender.y) {
         
         defender.takeDamage(damage);
-        defender.vx = attacker.facing * 4; // knockback
+        defender.vx = attacker.facing * 5.5; // 밀쳐내기 강도 약간 업
         return true;
     }
     return false;
@@ -955,30 +951,31 @@ function createHitParticles(x, y, color, count) {
 }
 
 function createExplosion(x, y, radius, color) {
-    screenShake = 8;
-    createHitParticles(x, y, color, 20);
-    // Visual explosion animation
+    screenShake = 12;
+    createHitParticles(x, y, color, 25);
     particles.push({
         x: x,
         y: y,
         r: 10,
         maxR: radius,
         color: color,
-        alpha: 0.6,
+        alpha: 0.7,
         update: function() {
-            this.r += 6;
-            this.alpha -= 0.04;
+            this.r += 8;
+            this.alpha -= 0.035;
         },
         draw: function(ctx) {
             ctx.save();
             ctx.globalAlpha = Math.max(0, this.alpha);
             ctx.fillStyle = this.color;
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 25;
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         },
-        life: 25
+        life: 30
     });
 }
 
@@ -1026,10 +1023,6 @@ function initGame() {
     gameTimer = 99;
     document.getElementById('timer').textContent = gameTimer;
 
-    // Skill Slot icons initialization
-    setupSkillIcons(1, player1.config);
-    setupSkillIcons(2, player2.config);
-
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
         if (currentGameState === STATE.PLAYING) {
@@ -1040,10 +1033,6 @@ function initGame() {
             }
         }
     }, 1000);
-}
-
-function setupSkillIcons(pId, config) {
-    // Basic icon remains sword or default
 }
 
 function endGame() {
@@ -1065,11 +1054,10 @@ function endGame() {
     showScreen('game-over-screen');
 }
 
-// Keyboard Listeners (AABB Simultaneous Button Press fix)
+// Keyboard Listeners
 window.addEventListener('keydown', e => {
     keys[e.key] = true;
     
-    // Pause trigger
     if (e.key.toLowerCase() === 'escape') {
         if (currentGameState === STATE.PLAYING) {
             currentGameState = STATE.PAUSED;
@@ -1090,7 +1078,6 @@ function handleInputs() {
     if (!player1 || !player2) return;
     
     // --- PLAYER 1 INPUTS (WASD + E/R/F) ---
-    // Horizontal Movement
     player1.vx = 0;
     if (keys['a'] || keys['A']) {
         player1.vx = -player1.config.speed;
@@ -1100,13 +1087,11 @@ function handleInputs() {
         player1.vx = player1.config.speed;
         player1.facing = 1;
     }
-    // Jump
     if (keys['w'] || keys['W']) {
         player1.jump();
-        keys['w'] = false; // Prevent auto repeated jumping
+        keys['w'] = false; 
         keys['W'] = false;
     }
-    // Attacks
     if (keys['e'] || keys['E']) {
         player1.useBasicAttack(player2);
     }
@@ -1118,7 +1103,6 @@ function handleInputs() {
     }
 
     // --- PLAYER 2 INPUTS (Arrows + Enter/P/Shift) ---
-    // Horizontal Movement
     player2.vx = 0;
     if (keys['ArrowLeft']) {
         player2.vx = -player2.config.speed;
@@ -1128,12 +1112,10 @@ function handleInputs() {
         player2.vx = player2.config.speed;
         player2.facing = 1;
     }
-    // Jump
     if (keys['ArrowUp']) {
         player2.jump();
         keys['ArrowUp'] = false;
     }
-    // Attacks
     if (keys['Enter']) {
         player2.useBasicAttack(player1);
     }
@@ -1145,17 +1127,15 @@ function handleInputs() {
     }
 }
 
-// --- 9. CANVAS RENDERING ENGINE (A & C) ---
+// --- 9. CANVAS RENDERING ENGINE ---
 function gameLoop() {
     if (currentGameState === STATE.PLAYING) {
-        // Handle physical movements and controls
         handleInputs();
         
-        // Update Players
         player1.update(activeMap.platforms);
         player2.update(activeMap.platforms);
 
-        // Sky Map boundary check (pitfall hazard)
+        // Sky Map boundary check (pitfall)
         if (activeMap === MAPS.sky) {
             if (player1.y > CANVAS_HEIGHT) player1.takeDamage(999);
             if (player2.y > CANVAS_HEIGHT) player2.takeDamage(999);
@@ -1166,7 +1146,6 @@ function gameLoop() {
             let p = projectiles[i];
             p.update();
             
-            // Check collision with maps platforms (normal bounds)
             let collided = false;
             for (let plat of activeMap.platforms) {
                 if (p.x > plat.x && p.x < plat.x + plat.w && p.y > plat.y && p.y < plat.y + plat.h) {
@@ -1175,24 +1154,20 @@ function gameLoop() {
                 }
             }
 
-            // Check hit with opponents
             let targetPlayer = p.owner === 1 ? player2 : player1;
             let distToTarget = Math.hypot(p.x - (targetPlayer.x + targetPlayer.width/2), p.y - (targetPlayer.y + targetPlayer.height/2));
             
             if (distToTarget < targetPlayer.height/2 + p.size) {
-                // Collision Hit
                 targetPlayer.takeDamage(p.damage);
                 collided = true;
                 
-                // Exploding type bomb projectile
                 if (p.type === 'bomb') {
-                    createExplosion(p.x, p.y, 60, p.color);
+                    createExplosion(p.x, p.y, 80, p.color);
                 }
                 
-                // Vampire healing projectile
                 if (p.type === 'absorb') {
                     let ownerPlayer = p.owner === 1 ? player1 : player2;
-                    ownerPlayer.hp = Math.min(ownerPlayer.maxHp, ownerPlayer.hp + Math.round(p.damage * 0.6));
+                    ownerPlayer.hp = Math.min(ownerPlayer.maxHp, ownerPlayer.hp + Math.round(p.damage * 0.7));
                 }
             }
 
@@ -1205,25 +1180,23 @@ function gameLoop() {
         for (let i = particles.length - 1; i >= 0; i--) {
             let part = particles[i];
             part.update();
-            if (part.alpha <= 0 || part.life <= 0) {
+            if (part.alpha <= 0) {
                 particles.splice(i, 1);
             }
         }
 
-        // Check Health termination conditions
         if (player1.hp <= 0 || player2.hp <= 0) {
             endGame();
         }
 
-        // Clear & Draw everything on Canvas
+        // Clear & Draw
         ctx.save();
         
-        // Handle screen shaking visual effect
         if (screenShake > 0) {
             let dx = (Math.random() - 0.5) * screenShake;
             let dy = (Math.random() - 0.5) * screenShake;
             ctx.translate(dx, dy);
-            screenShake *= 0.9;
+            screenShake *= 0.88;
             if (screenShake < 0.5) screenShake = 0;
         }
 
@@ -1231,39 +1204,38 @@ function gameLoop() {
         ctx.fillStyle = activeMap.background;
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         
-        // Cyber neon lines grids effect (Design Aesthetics)
-        if (activeMap === MAPS.cyber) {
-            ctx.strokeStyle = 'rgba(0, 255, 204, 0.05)';
-            ctx.lineWidth = 1;
-            for(let i=0; i<CANVAS_WIDTH; i+=40) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, CANVAS_HEIGHT);
-                ctx.stroke();
-            }
+        // Grid effect
+        ctx.strokeStyle = activeMap.gridColor;
+        ctx.lineWidth = 1;
+        for(let i=0; i<CANVAS_WIDTH; i+=40) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, CANVAS_HEIGHT);
+            ctx.stroke();
         }
 
-        // Platforms
+        // Platforms (Neon design enhanced)
         for (let plat of activeMap.platforms) {
-            ctx.fillStyle = activeMap === MAPS.cyber ? '#0c0b1a' : (activeMap === MAPS.sky ? '#1d3557' : '#3d3a45');
+            ctx.save();
+            ctx.fillStyle = plat.fill;
+            ctx.shadowColor = plat.border;
+            ctx.shadowBlur = 15; // 플랫폼 발광 효과 추가
             ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
             
-            // Neon neon border line
-            ctx.strokeStyle = activeMap === MAPS.cyber ? '#00ffcc' : (activeMap === MAPS.sky ? '#4cd964' : '#ffcc00');
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = plat.border;
+            ctx.lineWidth = 3.5; // 더 굵고 확실한 테두리
             ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+            ctx.restore();
         }
 
         // Render Entities
         player1.draw(ctx);
         player2.draw(ctx);
 
-        // Render Projectiles
         for (let p of projectiles) {
             p.draw(ctx);
         }
 
-        // Render Particles
         for (let part of particles) {
             part.draw(ctx);
         }
@@ -1274,7 +1246,6 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// Start Game Loop immediately
 requestAnimationFrame(gameLoop);
 
 // --- 10. SCREEN SWITCHER UTILS ---
@@ -1292,7 +1263,6 @@ function hideAllScreens() {
     });
 }
 
-// UI Select Events Configuration
 document.getElementById('start-btn').addEventListener('click', () => {
     showScreen('character-select');
     currentGameState = STATE.CHAR_SELECT;
@@ -1336,7 +1306,6 @@ document.getElementById('quit-btn').addEventListener('click', () => {
     currentGameState = STATE.MENU;
 });
 
-// Setup grid selectors
 function setupGridSelect(gridId) {
     const grid = document.getElementById(gridId);
     grid.addEventListener('click', e => {
@@ -1351,7 +1320,6 @@ function setupGridSelect(gridId) {
 setupGridSelect('p1-char-grid');
 setupGridSelect('p2-char-grid');
 
-// Map Select Configuration
 const mapGrid = document.querySelector('.map-grid');
 mapGrid.addEventListener('click', e => {
     const card = e.target.closest('.map-card');

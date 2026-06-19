@@ -491,8 +491,8 @@ body {
 
 .map-card {
     flex: 1;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid var(--border-color);
     border-radius: 12px;
     padding: 12px;
     cursor: pointer;
@@ -503,7 +503,9 @@ body {
 
 .map-card:hover {
     transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.05);
 }
 
 .map-preview {
