@@ -1,5 +1,5 @@
 // Bounce Attack - Premium Edition
-// Game Logic and Engine (Visual & Speed Upgrade Version)
+// Game Logic and Engine (Detailed Character Design & Original 0.5x Speed Rollback)
 
 // --- 1. GAME CONSTANTS & STATE ---
 const CANVAS_WIDTH = 1024;
@@ -61,15 +61,15 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 }
 
 // --- 3. CHARACTER CONFIGURATIONS ---
-// 모든 캐릭터의 이동 속도(speed)와 점프력(jumpForce)을 이전 0.5배 상태에서 1.5배 상승 적용 (= 원본 대비 0.75배로 조율)
+// 원래 요청하셨던 속도로 원복 (0.5배 속도 밸런싱)
 const CHARACTER_PRESETS = {
     swordsman: {
         name: 'SWORDSMAN',
         icon: '⚔️',
         color: '#ff2d55',
         maxHp: 120,
-        speed: 6.5 * 0.75, // 4.875
-        jumpForce: 15.5 * 0.75, // 11.625
+        speed: 6.5 * 0.5, // 3.25
+        jumpForce: 15.5 * 0.5, // 7.75
         basicDamage: 12,
         specialDamage: 22,
         ultDamage: 45,
@@ -82,8 +82,8 @@ const CHARACTER_PRESETS = {
         icon: '🔥',
         color: '#ff9500',
         maxHp: 90,
-        speed: 5.0 * 0.75, // 3.75
-        jumpForce: 15.0 * 0.75, // 11.25
+        speed: 5.0 * 0.5, // 2.5
+        jumpForce: 15.0 * 0.5, // 7.5
         basicDamage: 10,
         specialDamage: 26,
         ultDamage: 50,
@@ -96,8 +96,8 @@ const CHARACTER_PRESETS = {
         icon: '🏹',
         color: '#4cd964',
         maxHp: 95,
-        speed: 6.0 * 0.75, // 4.5
-        jumpForce: 16.0 * 0.75, // 12.0
+        speed: 6.0 * 0.5, // 3.0
+        jumpForce: 16.0 * 0.5, // 8.0
         basicDamage: 8,
         specialDamage: 18,
         ultDamage: 40,
@@ -110,8 +110,8 @@ const CHARACTER_PRESETS = {
         icon: '🗡️',
         color: '#af52de',
         maxHp: 90,
-        speed: 8.0 * 0.75, // 6.0
-        jumpForce: 17.5 * 0.75, // 13.125
+        speed: 8.0 * 0.5, // 4.0
+        jumpForce: 17.5 * 0.5, // 8.75
         basicDamage: 11,
         specialDamage: 20,
         ultDamage: 38,
@@ -124,8 +124,8 @@ const CHARACTER_PRESETS = {
         icon: '🔱',
         color: '#5ac8fa',
         maxHp: 110,
-        speed: 6.0 * 0.75, // 4.5
-        jumpForce: 15.0 * 0.75, // 11.25
+        speed: 6.0 * 0.5, // 3.0
+        jumpForce: 15.0 * 0.5, // 7.5
         basicDamage: 13,
         specialDamage: 22,
         ultDamage: 42,
@@ -138,8 +138,8 @@ const CHARACTER_PRESETS = {
         icon: '🪓',
         color: '#ff3b30',
         maxHp: 140,
-        speed: 5.5 * 0.75, // 4.125
-        jumpForce: 14.5 * 0.75, // 10.875
+        speed: 5.5 * 0.5, // 2.75
+        jumpForce: 14.5 * 0.5, // 7.25
         basicDamage: 15,
         specialDamage: 28,
         ultDamage: 52,
@@ -152,8 +152,8 @@ const CHARACTER_PRESETS = {
         icon: '🔫',
         color: '#ffcc00',
         maxHp: 85,
-        speed: 5.5 * 0.75, // 4.125
-        jumpForce: 14.0 * 0.75, // 10.5
+        speed: 5.5 * 0.5, // 2.75
+        jumpForce: 14.0 * 0.5, // 7.0
         basicDamage: 7,
         specialDamage: 17,
         ultDamage: 38,
@@ -166,8 +166,8 @@ const CHARACTER_PRESETS = {
         icon: '🥷',
         color: '#8e8e93',
         maxHp: 90,
-        speed: 7.5 * 0.75, // 5.625
-        jumpForce: 16.5 * 0.75, // 12.375
+        speed: 7.5 * 0.5, // 3.75
+        jumpForce: 16.5 * 0.5, // 8.25
         basicDamage: 9,
         specialDamage: 19,
         ultDamage: 38,
@@ -180,8 +180,8 @@ const CHARACTER_PRESETS = {
         icon: '🥊',
         color: '#e040fb',
         maxHp: 115,
-        speed: 6.5 * 0.75, // 4.875
-        jumpForce: 15.0 * 0.75, // 11.25
+        speed: 6.5 * 0.5, // 3.25
+        jumpForce: 15.0 * 0.5, // 7.5
         basicDamage: 12,
         specialDamage: 22,
         ultDamage: 42,
@@ -194,8 +194,8 @@ const CHARACTER_PRESETS = {
         icon: '💀',
         color: '#bf5af2',
         maxHp: 95,
-        speed: 4.8 * 0.75, // 3.6
-        jumpForce: 14.5 * 0.75, // 10.875
+        speed: 4.8 * 0.5, // 2.4
+        jumpForce: 14.5 * 0.5, // 7.25
         basicDamage: 9,
         specialDamage: 22,
         ultDamage: 45,
@@ -208,8 +208,8 @@ const CHARACTER_PRESETS = {
         icon: '🛡️',
         color: '#0a84ff',
         maxHp: 150,
-        speed: 4.5 * 0.75, // 3.375
-        jumpForce: 14.0 * 0.75, // 10.5
+        speed: 4.5 * 0.5, // 2.25
+        jumpForce: 14.0 * 0.5, // 7.0
         basicDamage: 10,
         specialDamage: 18,
         ultDamage: 35,
@@ -222,8 +222,8 @@ const CHARACTER_PRESETS = {
         icon: '🌑',
         color: '#3a3a4c',
         maxHp: 105,
-        speed: 5.5 * 0.75, // 4.125
-        jumpForce: 15.0 * 0.75, // 11.25
+        speed: 5.5 * 0.5, // 2.75
+        jumpForce: 15.0 * 0.5, // 7.5
         basicDamage: 14,
         specialDamage: 25,
         ultDamage: 45,
@@ -236,8 +236,8 @@ const CHARACTER_PRESETS = {
         icon: '🧛',
         color: '#ff2d55',
         maxHp: 100,
-        speed: 6.0 * 0.75, // 4.5
-        jumpForce: 15.5 * 0.75, // 11.625
+        speed: 6.0 * 0.5, // 3.0
+        jumpForce: 15.5 * 0.5, // 7.75
         basicDamage: 10,
         specialDamage: 21,
         ultDamage: 40,
@@ -250,8 +250,8 @@ const CHARACTER_PRESETS = {
         icon: '🧪',
         color: '#30d158',
         maxHp: 95,
-        speed: 5.0 * 0.75, // 3.75
-        jumpForce: 14.8 * 0.75, // 11.1
+        speed: 5.0 * 0.5, // 2.5
+        jumpForce: 14.8 * 0.5, // 7.4
         basicDamage: 8,
         specialDamage: 23,
         ultDamage: 38,
@@ -262,11 +262,10 @@ const CHARACTER_PRESETS = {
 };
 
 // --- 4. MAP CONFIGURATIONS ---
-// 플랫폼 시인성 대폭 강화 및 고대비 색상 테마 적용
 const MAPS = {
     cyber: {
         background: '#040209',
-        gridColor: 'rgba(0, 255, 204, 0.12)', // 더 선명한 격자선
+        gridColor: 'rgba(0, 255, 204, 0.12)',
         platforms: [
             { x: 0, y: 530, w: 1024, h: 46, border: '#00ffcc', fill: '#0a0915' },
             { x: 150, y: 390, w: 220, h: 18, border: '#ff0055', fill: '#140510' },
@@ -302,18 +301,18 @@ const MAPS = {
     }
 };
 
-// --- 5. PARTICLE SYSTEM & PROJECTILE CLASSES (Visual Glows Upgraded) ---
+// --- 5. PARTICLE & PROJECTILE SYSTEM ---
 class Particle {
     constructor(x, y, color, speedScale = 1.0) {
         this.x = x;
         this.y = y;
         this.color = color;
-        this.size = Math.random() * 6 + 3; // 크기 증가
-        this.speedX = (Math.random() - 0.5) * 12 * speedScale;
-        this.speedY = (Math.random() - 0.5) * 12 * speedScale - 3;
-        this.gravity = 0.25;
+        this.size = Math.random() * 5 + 2.5;
+        this.speedX = (Math.random() - 0.5) * 11 * speedScale;
+        this.speedY = (Math.random() - 0.5) * 11 * speedScale - 2.5;
+        this.gravity = 0.22;
         this.alpha = 1;
-        this.decay = Math.random() * 0.02 + 0.01;
+        this.decay = Math.random() * 0.02 + 0.012;
     }
 
     update() {
@@ -328,7 +327,7 @@ class Particle {
         ctx.globalAlpha = Math.max(0, this.alpha);
         ctx.fillStyle = this.color;
         ctx.shadowColor = this.color;
-        ctx.shadowBlur = 12; // 빛 번짐 효과 강화
+        ctx.shadowBlur = 10;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
@@ -343,7 +342,7 @@ class Projectile {
         this.dx = dx;
         this.dy = dy;
         this.color = color;
-        this.size = size * 1.5; // 투사체 크기 1.5배 증가 (가시성)
+        this.size = size * 1.4;
         this.speed = speed;
         this.damage = damage;
         this.owner = owner; 
@@ -365,9 +364,8 @@ class Projectile {
         this.x += this.dx * this.speed;
         this.y += this.dy * this.speed;
 
-        // 투사체 이동 흔적(Particle Trail) 생성하여 화려함 추가
-        if (Math.random() < 0.4) {
-            particles.push(new Particle(this.x, this.y, this.color, 0.3));
+        if (Math.random() < 0.45) {
+            particles.push(new Particle(this.x, this.y, this.color, 0.25));
         }
     }
 
@@ -375,21 +373,20 @@ class Projectile {
         ctx.save();
         ctx.fillStyle = this.color;
         ctx.shadowColor = this.color;
-        ctx.shadowBlur = 20; // 네온 가시성 극대화
+        ctx.shadowBlur = 18;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
         
-        // 투사체 중앙에 백색 코어를 넣어 훨씬 밝아보이도록 효과 연출
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size * 0.4, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.size * 0.45, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
     }
 }
 
-// --- 6. PLAYER CLASS & PHYSICS ---
+// --- 6. PLAYER CLASS & ADVANCED GRAPHICS (Detailed Vector Character Drawing) ---
 class Player {
     constructor(id, x, y, charKey) {
         this.id = id;
@@ -445,7 +442,6 @@ class Player {
         this.vy += gravity;
         this.x += this.vx;
         
-        // Wall boundaries
         if (this.x < 0) {
             this.x = 0;
             this.vx = 0;
@@ -457,7 +453,6 @@ class Player {
         this.y += this.vy;
         this.isGrounded = false;
 
-        // Platform collisions (AABB)
         for (let plat of platforms) {
             if (this.x + this.width > plat.x && 
                 this.x < plat.x + plat.w) {
@@ -508,9 +503,7 @@ class Player {
         this.hp = Math.max(0, this.hp - dmgTaken);
         
         this.gainUlt(dmgTaken * 0.6);
-        screenShake = 10; // 흔들림 강화
-        
-        // 피격 시 캐릭터 고유 색상의 스파크 파티클 다수 뿜어냄
+        screenShake = 10;
         createHitParticles(this.x + this.width/2, this.y + this.height/2, this.config.color, 16);
     }
 
@@ -529,7 +522,6 @@ class Player {
         this.isAttacking = true;
         this.attackTimer = 12;
         
-        // Melee hitbox calculation & triggering projectiles
         if (this.charKey === 'swordsman' || this.charKey === 'berserker' || this.charKey === 'brawler') {
             this.attackBox = {
                 x: this.facing === 1 ? this.x + this.width : this.x - 55,
@@ -698,7 +690,7 @@ class Player {
         if (this.ultGauge < 100) return;
         this.ultGauge = 0;
         
-        screenShake = 22; // 궁극기 시전 시 화면 진동 대폭 증가 (박진감)
+        screenShake = 22;
 
         if (this.charKey === 'swordsman') {
             for(let i=0; i<7; i++) {
@@ -770,7 +762,7 @@ class Player {
                     ctx.save();
                     ctx.fillStyle = '#ffcc00';
                     ctx.shadowColor = '#ffcc00';
-                    ctx.shadowBlur = 30; // 굵기 및 발광 강화
+                    ctx.shadowBlur = 30; 
                     ctx.fillRect(this.facing === 1 ? beamX : 0, this.y - 15, beamW, 30);
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(this.facing === 1 ? beamX : 0, this.y - 5, beamW, 10);
@@ -788,7 +780,7 @@ class Player {
                 }
             }
         } 
-        else if (this.charKey === 'ninja') {
+        else if (this.ninja) {
             for (let i = 0; i < 15; i++) {
                 setTimeout(() => {
                     let rx = Math.random() * CANVAS_WIDTH;
@@ -850,6 +842,7 @@ class Player {
         document.getElementById(`p${this.id}-ult`).style.width = `${this.ultGauge}%`;
     }
 
+    // --- 2D 벡터 그래픽 캐릭터 드로잉 고도화 (구린 사각형 제거) ---
     draw(ctx) {
         if (this.isInvisible) {
             ctx.save();
@@ -857,37 +850,167 @@ class Player {
         }
 
         ctx.save();
-        // 1. 캐릭터 네온 글로우 섀도우 효과 부여
         ctx.shadowColor = this.config.color;
-        ctx.shadowBlur = 18;
+        ctx.shadowBlur = 12;
+
+        const pX = this.x;
+        const pY = this.y;
+        const w = this.width;
+        const h = this.height;
+
+        // 1. 다리 및 발 드로잉 (달릴 때나 지면에 있을 때 다리 모양)
+        ctx.fillStyle = '#111';
+        ctx.fillRect(pX + 6, pY + h - 10, 8, 10);
+        ctx.fillRect(pX + w - 14, pY + h - 10, 8, 10);
         
-        // 2. 캐릭터 바디 그라데이션 적용 (밋밋함 제거)
-        let grad = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
-        grad.addColorStop(0, this.config.color);
-        grad.addColorStop(0.7, this.config.color);
-        grad.addColorStop(1, '#0e0a16');
-        ctx.fillStyle = grad;
+        ctx.fillStyle = this.config.color;
+        ctx.fillRect(pX + 4, pY + h - 4, 11, 5); // 신발
+        ctx.fillRect(pX + w - 15, pY + h - 4, 11, 5);
+
+        // 2. 몸통 갑옷/의복 드로잉
+        let bodyGrad = ctx.createLinearGradient(pX, pY + 16, pX, pY + h - 10);
+        bodyGrad.addColorStop(0, this.config.color);
+        bodyGrad.addColorStop(0.6, this.config.color);
+        bodyGrad.addColorStop(1, '#0e0b16');
+        ctx.fillStyle = bodyGrad;
         
-        // 둥근 모서리형 바디 드로잉
-        drawRoundedRect(ctx, this.x, this.y, this.width, this.height, 8);
+        drawRoundedRect(ctx, pX + 2, pY + 16, w - 4, h - 26, 6);
         ctx.fill();
-        
-        // 테두리 선명한 스트로크 추가
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-        drawRoundedRect(ctx, this.x, this.y, this.width, this.height, 8);
+        ctx.lineWidth = 1.5;
+        drawRoundedRect(ctx, pX + 2, pY + 16, w - 4, h - 26, 6);
         ctx.stroke();
+
+        // 3. 얼굴 피부 드로잉
+        ctx.fillStyle = '#ffd1b3'; // 스킨톤
+        ctx.beginPath();
+        ctx.arc(pX + w/2, pY + 12, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 4. 캐릭터별 헤어스타일 및 특수 파츠 디테일 렌더링
+        ctx.fillStyle = '#222';
+        if (this.charKey === 'swordsman' || this.charKey === 'berserker') {
+            // 전사 헬멧 혹은 거친 머리스타일
+            ctx.fillStyle = this.charKey === 'swordsman' ? '#8e8e93' : '#ff3b30';
+            ctx.beginPath();
+            ctx.arc(pX + w/2, pY + 8, 11, Math.PI, 0);
+            ctx.fill();
+            // 투구 깃털
+            ctx.fillStyle = '#ff2d55';
+            ctx.fillRect(pX + w/2 - 2, pY - 5, 4, 6);
+        } else if (this.charKey === 'mage' || this.charKey === 'necromancer') {
+            // 마법사 뾰족 고깔모자
+            ctx.fillStyle = this.charKey === 'mage' ? '#5856d6' : '#1d1d26';
+            ctx.beginPath();
+            ctx.moveTo(pX + w/2 - 12, pY + 6);
+            ctx.lineTo(pX + w/2, pY - 10);
+            ctx.lineTo(pX + w/2 + 12, pY + 6);
+            ctx.closePath();
+            ctx.fill();
+        } else if (this.charKey === 'ninja') {
+            // 닌자 복면 (눈 주변 빼고 다 가림)
+            ctx.fillStyle = '#2c2c2e';
+            ctx.beginPath();
+            ctx.arc(pX + w/2, pY + 12, 11, 0, Math.PI*2);
+            ctx.fill();
+            // 눈구멍 슬릿
+            ctx.fillStyle = '#ffd1b3';
+            ctx.fillRect(pX + w/2 - 7, pY + 9, 14, 5);
+        } else if (this.charKey === 'archer' || this.charKey === 'rogue') {
+            // 궁수/도적 후드(Hood)
+            ctx.fillStyle = this.config.color;
+            ctx.beginPath();
+            ctx.arc(pX + w/2, pY + 11, 12, Math.PI, 0);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(pX + w/2 - 12, pY + 11);
+            ctx.lineTo(pX + w/2 - 5, pY + 20);
+            ctx.lineTo(pX + w/2 + 5, pY + 20);
+            ctx.lineTo(pX + w/2 + 12, pY + 11);
+            ctx.fill();
+        } else if (this.charKey === 'paladin') {
+            // 성기사 황금 티아라/헬멧
+            ctx.fillStyle = '#ffcc00';
+            ctx.beginPath();
+            ctx.arc(pX + w/2, pY + 8, 11, Math.PI, 0);
+            ctx.fill();
+            ctx.fillRect(pX + w/2 - 3, pY - 4, 6, 6); // 헬멧 크로스
+        }
+
+        // 5. 눈 (시선 방향 렌더링)
+        ctx.fillStyle = '#000';
+        let eyeX = this.facing === 1 ? pX + w/2 + 3 : pX + w/2 - 7;
+        ctx.fillRect(eyeX, pY + 9, 4, 5);
+        ctx.fillStyle = this.charKey === 'vampire' ? '#ff0000' : '#00ffff'; // 뱀파이어는 적안
+        ctx.fillRect(this.facing === 1 ? eyeX + 2 : eyeX, pY + 10, 2, 3);
+
+        // 6. 무기 모델 묘사 (격투가 제외 무기 장착)
         ctx.restore();
-        
-        // 방향 지시 안구 그래픽
-        ctx.fillStyle = '#ffffff';
-        let eyeOffset = this.facing === 1 ? 26 : 6;
-        ctx.fillRect(this.x + eyeOffset, this.y + 12, 6, 6);
-        ctx.fillStyle = '#000000';
-        let pupOffset = this.facing === 1 ? 28 : 6;
-        ctx.fillRect(this.x + pupOffset, this.y + 12, 4, 6);
-        
-        // 실드 상태 이펙트 강화 (선명한 하늘색 원형 실드)
+        ctx.save();
+        ctx.shadowColor = this.config.color;
+        ctx.shadowBlur = 12;
+
+        let handX = this.facing === 1 ? pX + w - 2 : pX + 2;
+        let handY = pY + 30;
+
+        if (this.charKey === 'swordsman' || this.charKey === 'berserker' || this.charKey === 'reaper') {
+            // 대검 / 광폭 도끼 / 사신 낫
+            ctx.strokeStyle = this.charKey === 'reaper' ? '#55555d' : '#e5e5ea';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.moveTo(handX, handY);
+            ctx.lineTo(handX + this.facing * 20, handY - 14);
+            ctx.stroke();
+
+            // 날 묘사
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(handX + this.facing * 20, handY - 14, 4, 0, Math.PI*2);
+            ctx.fill();
+        } else if (this.charKey === 'lancer') {
+            // 장창
+            ctx.strokeStyle = '#d1d1d6';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(handX - this.facing * 8, handY + 10);
+            ctx.lineTo(handX + this.facing * 28, handY - 14);
+            ctx.stroke();
+            // 창날 삼지창 모양
+            ctx.fillStyle = '#5ac8fa';
+            ctx.beginPath();
+            ctx.moveTo(handX + this.facing * 28, handY - 14);
+            ctx.lineTo(handX + this.facing * 34, handY - 18);
+            ctx.lineTo(handX + this.facing * 26, handY - 20);
+            ctx.fill();
+        } else if (this.charKey === 'mage' || this.charKey === 'necromancer') {
+            // 마법 지팡이
+            ctx.strokeStyle = '#ac8e68';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(handX, handY + 8);
+            ctx.lineTo(handX + this.facing * 12, handY - 12);
+            ctx.stroke();
+            
+            // 지팡이 끝 발광 보석
+            ctx.fillStyle = this.config.color;
+            ctx.beginPath();
+            ctx.arc(handX + this.facing * 12, handY - 12, 6, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (this.charKey === 'archer') {
+            // 활 활시위
+            ctx.strokeStyle = '#ff9500';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(handX + this.facing * 6, handY, 12, -Math.PI/2, Math.PI/2);
+            ctx.stroke();
+        } else if (this.charKey === 'gunner') {
+            // 권총
+            ctx.fillStyle = '#555';
+            ctx.fillRect(handX, handY - 4, 12 * this.facing, 6);
+            ctx.fillRect(handX + (this.facing === 1 ? 2 : -4), handY, 4, 8);
+        }
+
+        // 실드 오라
         if (this.isShielded) {
             ctx.save();
             ctx.strokeStyle = '#00e5ff';
@@ -895,12 +1018,12 @@ class Player {
             ctx.shadowBlur = 15;
             ctx.lineWidth = 3.5;
             ctx.beginPath();
-            ctx.arc(this.x + this.width/2, this.y + this.height/2, this.height/2 + 6, 0, Math.PI*2);
+            ctx.arc(pX + w/2, pY + h/2, h/2 + 6, 0, Math.PI*2);
             ctx.stroke();
             ctx.restore();
         }
 
-        // 폭주(버서크) 이펙트 강화
+        // 폭주 오라
         if (this.berserkMode) {
             ctx.save();
             ctx.strokeStyle = '#ff3b30';
@@ -908,12 +1031,12 @@ class Player {
             ctx.shadowBlur = 15;
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.arc(this.x + this.width/2, this.y + this.height/2, this.height/2 + 4, 0, Math.PI*2);
+            ctx.arc(pX + w/2, pY + h/2, h/2 + 4, 0, Math.PI*2);
             ctx.stroke();
             ctx.restore();
         }
 
-        // 근접 물리 히트박스 영역 가시적 표시 (검 베기 등)
+        // 히트박스 영역 가시적 표시 (공격 시)
         if (this.isAttacking && (this.charKey === 'swordsman' || this.charKey === 'berserker' || this.charKey === 'brawler' || this.charKey === 'lancer' || this.charKey === 'paladin' || this.charKey === 'reaper' || this.charKey === 'vampire' || this.charKey === 'rogue')) {
             ctx.save();
             ctx.fillStyle = this.config.color;
@@ -923,6 +1046,8 @@ class Player {
             ctx.fillRect(this.attackBox.x, this.attackBox.y, this.attackBox.w, this.attackBox.h);
             ctx.restore();
         }
+
+        ctx.restore();
 
         if (this.isInvisible) {
             ctx.restore();
@@ -938,7 +1063,7 @@ function checkMeleeHit(attacker, defender, damage) {
         attacker.attackBox.y + attacker.attackBox.h > defender.y) {
         
         defender.takeDamage(damage);
-        defender.vx = attacker.facing * 5.5; // 밀쳐내기 강도 약간 업
+        defender.vx = attacker.facing * 5.5; 
         return true;
     }
     return false;
@@ -1135,7 +1260,6 @@ function gameLoop() {
         player1.update(activeMap.platforms);
         player2.update(activeMap.platforms);
 
-        // Sky Map boundary check (pitfall)
         if (activeMap === MAPS.sky) {
             if (player1.y > CANVAS_HEIGHT) player1.takeDamage(999);
             if (player2.y > CANVAS_HEIGHT) player2.takeDamage(999);
@@ -1214,16 +1338,16 @@ function gameLoop() {
             ctx.stroke();
         }
 
-        // Platforms (Neon design enhanced)
+        // Platforms
         for (let plat of activeMap.platforms) {
             ctx.save();
             ctx.fillStyle = plat.fill;
             ctx.shadowColor = plat.border;
-            ctx.shadowBlur = 15; // 플랫폼 발광 효과 추가
+            ctx.shadowBlur = 15;
             ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
             
             ctx.strokeStyle = plat.border;
-            ctx.lineWidth = 3.5; // 더 굵고 확실한 테두리
+            ctx.lineWidth = 3.5;
             ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
             ctx.restore();
         }
