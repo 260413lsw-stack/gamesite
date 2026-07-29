@@ -54,7 +54,7 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
     ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
     ctx.lineTo(x + width, y + height - radius);
     ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
+    ctx.lineTo(x + radius, y);
     ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
     ctx.lineTo(x, y + radius);
     ctx.quadraticCurveTo(x, y, x + radius, y);
@@ -62,15 +62,15 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 }
 
 // --- CHARACTER CONFIGURATIONS ---
-// 이동속도와 점프속도 둘 다 1.5배 증가 (기존 0.5배 기준 -> 0.75배 적용)
+// 이동속도 1.5배 상향(0.75 * 1.5 = 1.125), 점프속도 1.3배 빠른 이행(0.75 * 1.3 = 0.975), 점프높이 동일 보존 (Gravity 0.676)
 const CHARACTER_PRESETS = {
     swordsman: {
         name: 'SWORDSMAN',
         icon: 'SW',
         color: '#ff2d55',
         maxHp: 120,
-        speed: 6.5 * 0.75,
-        jumpForce: 15.5 * 0.75,
+        speed: 6.5 * 1.125,
+        jumpForce: 15.5 * 0.975,
         basicDamage: 12,
         specialDamage: 22,
         ultDamage: 45,
@@ -83,8 +83,8 @@ const CHARACTER_PRESETS = {
         icon: 'MG',
         color: '#ff9500',
         maxHp: 90,
-        speed: 5.0 * 0.75,
-        jumpForce: 15.0 * 0.75,
+        speed: 5.0 * 1.125,
+        jumpForce: 15.0 * 0.975,
         basicDamage: 10,
         specialDamage: 26,
         ultDamage: 50,
@@ -97,8 +97,8 @@ const CHARACTER_PRESETS = {
         icon: 'AR',
         color: '#4cd964',
         maxHp: 95,
-        speed: 6.0 * 0.75,
-        jumpForce: 16.0 * 0.75,
+        speed: 6.0 * 1.125,
+        jumpForce: 16.0 * 0.975,
         basicDamage: 8,
         specialDamage: 18,
         ultDamage: 40,
@@ -111,8 +111,8 @@ const CHARACTER_PRESETS = {
         icon: 'RG',
         color: '#af52de',
         maxHp: 90,
-        speed: 8.0 * 0.75,
-        jumpForce: 17.5 * 0.75,
+        speed: 8.0 * 1.125,
+        jumpForce: 17.5 * 0.975,
         basicDamage: 11,
         specialDamage: 20,
         ultDamage: 38,
@@ -125,8 +125,8 @@ const CHARACTER_PRESETS = {
         icon: 'LC',
         color: '#5ac8fa',
         maxHp: 110,
-        speed: 6.0 * 0.75,
-        jumpForce: 15.0 * 0.75,
+        speed: 6.0 * 1.125,
+        jumpForce: 15.0 * 0.975,
         basicDamage: 13,
         specialDamage: 22,
         ultDamage: 42,
@@ -139,8 +139,8 @@ const CHARACTER_PRESETS = {
         icon: 'BS',
         color: '#ff3b30',
         maxHp: 140,
-        speed: 5.5 * 0.75,
-        jumpForce: 14.5 * 0.75,
+        speed: 5.5 * 1.125,
+        jumpForce: 14.5 * 0.975,
         basicDamage: 15,
         specialDamage: 28,
         ultDamage: 52,
@@ -153,8 +153,8 @@ const CHARACTER_PRESETS = {
         icon: 'GN',
         color: '#ffcc00',
         maxHp: 85,
-        speed: 5.5 * 0.75,
-        jumpForce: 14.0 * 0.75,
+        speed: 5.5 * 1.125,
+        jumpForce: 14.0 * 0.975,
         basicDamage: 7,
         specialDamage: 17,
         ultDamage: 38,
@@ -167,8 +167,8 @@ const CHARACTER_PRESETS = {
         icon: 'NJ',
         color: '#8e8e93',
         maxHp: 90,
-        speed: 7.5 * 0.75,
-        jumpForce: 16.5 * 0.75,
+        speed: 7.5 * 1.125,
+        jumpForce: 16.5 * 0.975,
         basicDamage: 9,
         specialDamage: 19,
         ultDamage: 38,
@@ -181,8 +181,8 @@ const CHARACTER_PRESETS = {
         icon: 'BR',
         color: '#e040fb',
         maxHp: 115,
-        speed: 6.5 * 0.75,
-        jumpForce: 15.0 * 0.75,
+        speed: 6.5 * 1.125,
+        jumpForce: 15.0 * 0.975,
         basicDamage: 12,
         specialDamage: 22,
         ultDamage: 42,
@@ -195,8 +195,8 @@ const CHARACTER_PRESETS = {
         icon: 'NC',
         color: '#bf5af2',
         maxHp: 95,
-        speed: 4.8 * 0.75,
-        jumpForce: 14.5 * 0.75,
+        speed: 4.8 * 1.125,
+        jumpForce: 14.5 * 0.975,
         basicDamage: 9,
         specialDamage: 22,
         ultDamage: 45,
@@ -209,8 +209,8 @@ const CHARACTER_PRESETS = {
         icon: 'PL',
         color: '#0a84ff',
         maxHp: 150,
-        speed: 4.5 * 0.75,
-        jumpForce: 14.0 * 0.75,
+        speed: 4.5 * 1.125,
+        jumpForce: 14.0 * 0.975,
         basicDamage: 10,
         specialDamage: 18,
         ultDamage: 35,
@@ -223,8 +223,8 @@ const CHARACTER_PRESETS = {
         icon: 'RP',
         color: '#3a3a4c',
         maxHp: 105,
-        speed: 5.5 * 0.75,
-        jumpForce: 15.0 * 0.75,
+        speed: 5.5 * 1.125,
+        jumpForce: 15.0 * 0.975,
         basicDamage: 14,
         specialDamage: 25,
         ultDamage: 45,
@@ -237,8 +237,8 @@ const CHARACTER_PRESETS = {
         icon: 'VP',
         color: '#ff2d55',
         maxHp: 100,
-        speed: 6.0 * 0.75,
-        jumpForce: 15.5 * 0.75,
+        speed: 6.0 * 1.125,
+        jumpForce: 15.5 * 0.975,
         basicDamage: 10,
         specialDamage: 21,
         ultDamage: 40,
@@ -251,8 +251,8 @@ const CHARACTER_PRESETS = {
         icon: 'AL',
         color: '#30d158',
         maxHp: 95,
-        speed: 5.0 * 0.75,
-        jumpForce: 14.8 * 0.75,
+        speed: 5.0 * 1.125,
+        jumpForce: 14.8 * 0.975,
         basicDamage: 8,
         specialDamage: 23,
         ultDamage: 38,
@@ -439,7 +439,8 @@ class Player {
             if (this.berserkDuration <= 0) this.berserkMode = false;
         }
         
-        const gravity = 0.4;
+        // 점프속도 1.3배 가속 시 최고점 높이를 동일하게 보존하기 위한 상향된 중력 (0.4 * 1.69 = 0.676)
+        const gravity = 0.676;
         this.vy += gravity;
         this.x += this.vx;
         
@@ -458,7 +459,7 @@ class Player {
             if (this.x + this.width > plat.x && 
                 this.x < plat.x + plat.w) {
                 if (this.vy > 0 && 
-                    this.y + this.height - this.vy <= plat.y + 6 && 
+                    this.y + this.height - this.vy <= plat.y + 10 && 
                     this.y + this.height >= plat.y) {
                     this.y = plat.y - this.height;
                     this.vy = 0;
