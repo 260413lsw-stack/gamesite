@@ -1,5 +1,5 @@
 // Bounce Attack - Tekken Style Stickman Edition
-// Fixed 3 Horizontal Maps (Flat, Classic, Fancy) with 100% Reliable SVG Silhouette Map Selection
+// Strictly Forced 3-Column Horizontal Layout with Clear Active Map Selection Buttons
 
 const CANVAS_WIDTH = 2048;
 const CANVAS_HEIGHT = 1152;
@@ -1382,15 +1382,23 @@ function setupGridSelect(gridId) {
 setupGridSelect('p1-char-grid');
 setupGridSelect('p2-char-grid');
 
-// 3 HORIZONTAL MAP SELECTION EVENT LISTENER
+// 3 HORIZONTAL MAP SELECTION EVENT LISTENER (With SELECT button sync)
 const mapRow = document.querySelector('.map-horizontal-row');
 if (mapRow) {
     mapRow.addEventListener('click', e => {
         const card = e.target.closest('.map-card');
         if (!card) return;
         
-        mapRow.querySelectorAll('.map-card').forEach(c => c.classList.remove('active'));
+        mapRow.querySelectorAll('.map-card').forEach(c => {
+            c.classList.remove('active');
+            const btn = c.querySelector('.select-map-btn');
+            if (btn) btn.textContent = 'SELECT';
+        });
+        
         card.classList.add('active');
+        const activeBtn = card.querySelector('.select-map-btn');
+        if (activeBtn) activeBtn.textContent = 'SELECTED';
+        
         selectedMapKey = card.dataset.map;
     });
 }
