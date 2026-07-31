@@ -488,12 +488,13 @@ body {
     padding: 30px 20px !important;
 }
 
-.map-horizontal-row {
+.map-horizontal-row-two {
     display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 24px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 36px !important;
     margin-bottom: 25px !important;
-    width: 100% !important;
+    width: 90% !important;
+    max-width: 1000px !important;
 }
 
 .map-card {

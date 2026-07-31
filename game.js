@@ -1,5 +1,5 @@
 // Bounce Attack - Tekken Style Stickman Edition
-// Smooth Screen Transition, Expanded Ceiling Headroom, and Hit-Only Ult Charge (Basic: +12%, Special: +30%)
+// 1.5x Reduced Jump Force, 1.5x Expanded Arenas, 2 Selectable Maps, and Strict Hit-Only Ult Charge for Special Attacks
 
 const CANVAS_WIDTH = 2048;
 const CANVAS_HEIGHT = 1152;
@@ -20,7 +20,6 @@ let particles = [];
 let projectiles = [];
 let sparks = [];
 let comboTexts = [];
-let fancyBackgroundParticles = [];
 
 let screenShake = 0;
 let hitStopTimer = 0;
@@ -53,66 +52,50 @@ function playBgm() {
 }
 
 // --- CHARACTER CONFIGURATIONS ---
+// 점프력 1.5배 낮게 보정 (2.142 / 1.5 = 1.428)
 const CHARACTER_PRESETS = {
-    swordsman: { name: 'SWORDSMAN', icon: 'SW', color: '#ff9500', maxHp: 120, speed: 6.5 * 0.84375, jumpForce: 15.5 * 2.142, basicDamage: 12, specialDamage: 22, ultDamage: 45, basicCd: 400, specialCd: 1200, ultCd: 4000 },
-    mage: { name: 'MAGE', icon: 'MG', color: '#ff2d55', maxHp: 90, speed: 5.0 * 0.84375, jumpForce: 15.0 * 2.142, basicDamage: 10, specialDamage: 26, ultDamage: 50, basicCd: 500, specialCd: 1400, ultCd: 4800 },
-    archer: { name: 'ARCHER', icon: 'AR', color: '#4cd964', maxHp: 95, speed: 6.0 * 0.84375, jumpForce: 16.0 * 2.142, basicDamage: 8, specialDamage: 18, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4200 },
-    rogue: { name: 'ROGUE', icon: 'RG', color: '#bf5af2', maxHp: 90, speed: 8.0 * 0.84375, jumpForce: 17.5 * 2.142, basicDamage: 11, specialDamage: 20, ultDamage: 38, basicCd: 300, specialCd: 1000, ultCd: 3500 },
-    lancer: { name: 'LANCER', icon: 'LC', color: '#5ac8fa', maxHp: 110, speed: 6.0 * 0.84375, jumpForce: 15.0 * 2.142, basicDamage: 13, specialDamage: 22, ultDamage: 42, basicCd: 500, specialCd: 1300, ultCd: 4000 },
-    berserker: { name: 'BERSERKER', icon: 'BS', color: '#ff3b30', maxHp: 140, speed: 5.5 * 0.84375, jumpForce: 14.5 * 2.142, basicDamage: 15, specialDamage: 28, ultDamage: 52, basicCd: 650, specialCd: 1600, ultCd: 4800 },
-    gunner: { name: 'GUNNER', icon: 'GN', color: '#ffcc00', maxHp: 85, speed: 5.5 * 0.84375, jumpForce: 14.0 * 2.142, basicDamage: 7, specialDamage: 17, ultDamage: 38, basicCd: 220, specialCd: 1000, ultCd: 3800 },
-    ninja: { name: 'NINJA', icon: 'NJ', color: '#00e5ff', maxHp: 90, speed: 7.5 * 0.84375, jumpForce: 16.5 * 2.142, basicDamage: 9, specialDamage: 19, ultDamage: 38, basicCd: 320, specialCd: 850, ultCd: 3600 },
-    brawler: { name: 'BRAWLER', icon: 'BR', color: '#e040fb', maxHp: 115, speed: 6.5 * 0.84375, jumpForce: 15.0 * 2.142, basicDamage: 12, specialDamage: 22, ultDamage: 42, basicCd: 380, specialCd: 1100, ultCd: 4000 },
-    necromancer: { name: 'NECROMANCER', icon: 'NC', color: '#8e8e93', maxHp: 95, speed: 4.8 * 0.84375, jumpForce: 14.5 * 2.142, basicDamage: 9, specialDamage: 22, ultDamage: 45, basicCd: 600, specialCd: 1500, ultCd: 4800 },
-    paladin: { name: 'PALADIN', icon: 'PL', color: '#0a84ff', maxHp: 150, speed: 4.5 * 0.84375, jumpForce: 14.0 * 2.142, basicDamage: 10, specialDamage: 18, ultDamage: 35, basicCd: 550, specialCd: 1800, ultCd: 4800 },
-    reaper: { name: 'REAPER', icon: 'RP', color: '#34c759', maxHp: 105, speed: 5.5 * 0.84375, jumpForce: 15.0 * 2.142, basicDamage: 14, specialDamage: 25, ultDamage: 45, basicCd: 550, specialCd: 1300, ultCd: 4200 },
-    vampire: { name: 'VAMPIRE', icon: 'VP', color: '#ff2d55', maxHp: 100, speed: 6.0 * 0.84375, jumpForce: 15.5 * 2.142, basicDamage: 10, specialDamage: 21, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4000 },
-    alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 2.142, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
+    swordsman: { name: 'SWORDSMAN', icon: 'SW', color: '#ff9500', maxHp: 120, speed: 6.5 * 0.84375, jumpForce: 15.5 * 1.428, basicDamage: 12, specialDamage: 22, ultDamage: 45, basicCd: 400, specialCd: 1200, ultCd: 4000 },
+    mage: { name: 'MAGE', icon: 'MG', color: '#ff2d55', maxHp: 90, speed: 5.0 * 0.84375, jumpForce: 15.0 * 1.428, basicDamage: 10, specialDamage: 26, ultDamage: 50, basicCd: 500, specialCd: 1400, ultCd: 4800 },
+    archer: { name: 'ARCHER', icon: 'AR', color: '#4cd964', maxHp: 95, speed: 6.0 * 0.84375, jumpForce: 16.0 * 1.428, basicDamage: 8, specialDamage: 18, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4200 },
+    rogue: { name: 'ROGUE', icon: 'RG', color: '#bf5af2', maxHp: 90, speed: 8.0 * 0.84375, jumpForce: 17.5 * 1.428, basicDamage: 11, specialDamage: 20, ultDamage: 38, basicCd: 300, specialCd: 1000, ultCd: 3500 },
+    lancer: { name: 'LANCER', icon: 'LC', color: '#5ac8fa', maxHp: 110, speed: 6.0 * 0.84375, jumpForce: 15.0 * 1.428, basicDamage: 13, specialDamage: 22, ultDamage: 42, basicCd: 500, specialCd: 1300, ultCd: 4000 },
+    berserker: { name: 'BERSERKER', icon: 'BS', color: '#ff3b30', maxHp: 140, speed: 5.5 * 0.84375, jumpForce: 14.5 * 1.428, basicDamage: 15, specialDamage: 28, ultDamage: 52, basicCd: 650, specialCd: 1600, ultCd: 4800 },
+    gunner: { name: 'GUNNER', icon: 'GN', color: '#ffcc00', maxHp: 85, speed: 5.5 * 0.84375, jumpForce: 14.0 * 1.428, basicDamage: 7, specialDamage: 17, ultDamage: 38, basicCd: 220, specialCd: 1000, ultCd: 3800 },
+    ninja: { name: 'NINJA', icon: 'NJ', color: '#00e5ff', maxHp: 90, speed: 7.5 * 0.84375, jumpForce: 16.5 * 1.428, basicDamage: 9, specialDamage: 19, ultDamage: 38, basicCd: 320, specialCd: 850, ultCd: 3600 },
+    brawler: { name: 'BRAWLER', icon: 'BR', color: '#e040fb', maxHp: 115, speed: 6.5 * 0.84375, jumpForce: 15.0 * 1.428, basicDamage: 12, specialDamage: 22, ultDamage: 42, basicCd: 380, specialCd: 1100, ultCd: 4000 },
+    necromancer: { name: 'NECROMANCER', icon: 'NC', color: '#8e8e93', maxHp: 95, speed: 4.8 * 0.84375, jumpForce: 14.5 * 1.428, basicDamage: 9, specialDamage: 22, ultDamage: 45, basicCd: 600, specialCd: 1500, ultCd: 4800 },
+    paladin: { name: 'PALADIN', icon: 'PL', color: '#0a84ff', maxHp: 150, speed: 4.5 * 0.84375, jumpForce: 14.0 * 1.428, basicDamage: 10, specialDamage: 18, ultDamage: 35, basicCd: 550, specialCd: 1800, ultCd: 4800 },
+    reaper: { name: 'REAPER', icon: 'RP', color: '#34c759', maxHp: 105, speed: 5.5 * 0.84375, jumpForce: 15.0 * 1.428, basicDamage: 14, specialDamage: 25, ultDamage: 45, basicCd: 550, specialCd: 1300, ultCd: 4200 },
+    vampire: { name: 'VAMPIRE', icon: 'VP', color: '#ff2d55', maxHp: 100, speed: 6.0 * 0.84375, jumpForce: 15.5 * 1.428, basicDamage: 10, specialDamage: 21, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4000 },
+    alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 1.428, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
 };
 
-// --- 3 REFINED MAPS WITH EXPANDED CEILING HEADROOM ---
+// --- 2 REFINED EXPANDED MAPS ---
 const MAPS = {
     flat: {
         name: 'FLAT ARENA',
         background: '#090d16',
         gridColor: 'rgba(0, 229, 255, 0.12)',
         gravity: 0.676,
-        isFancy: false,
         platforms: [
             { x: 0, y: 1090, w: 2048, h: 62, border: '#00e5ff', fill: '#0f172a' }
         ],
-        spawnP1: { x: 300, y: 910 },
-        spawnP2: { x: 1748, y: 910 }
+        spawnP1: { x: 260, y: 910 },
+        spawnP2: { x: 1788, y: 910 }
     },
     classic: {
         name: 'CLASSIC ARENA',
         background: '#0e0b1a',
         gridColor: 'rgba(255, 170, 0, 0.1)',
         gravity: 0.676,
-        isFancy: false,
         platforms: [
             { x: 0, y: 1090, w: 2048, h: 62, border: '#ffaa00', fill: '#1b152b' },
-            { x: 300, y: 850, w: 440, h: 36, border: '#ff0055', fill: '#250f24' },
-            { x: 1308, y: 850, w: 440, h: 36, border: '#ff0055', fill: '#250f24' },
-            { x: 774, y: 620, w: 500, h: 36, border: '#00ffcc', fill: '#1b152b' }
+            { x: 240, y: 850, w: 480, h: 36, border: '#ff0055', fill: '#250f24' },
+            { x: 1328, y: 850, w: 480, h: 36, border: '#ff0055', fill: '#250f24' },
+            { x: 744, y: 620, w: 560, h: 36, border: '#00ffcc', fill: '#1b152b' }
         ],
-        spawnP1: { x: 300, y: 910 },
-        spawnP2: { x: 1748, y: 910 }
-    },
-    fancy: {
-        name: 'FANCY NEON CITY',
-        background: '#060012',
-        gridColor: 'rgba(255, 0, 127, 0.18)',
-        gravity: 0.676,
-        isFancy: true,
-        platforms: [
-            { x: 0, y: 1090, w: 2048, h: 62, border: '#ff007f', fill: '#15002b' },
-            { x: 200, y: 840, w: 450, h: 36, border: '#00e5ff', fill: '#15002b' },
-            { x: 1398, y: 840, w: 450, h: 36, border: '#00e5ff', fill: '#15002b' },
-            { x: 724, y: 600, w: 600, h: 36, border: '#ff007f', fill: '#15002b' }
-        ],
-        spawnP1: { x: 300, y: 910 },
-        spawnP2: { x: 1748, y: 910 }
+        spawnP1: { x: 260, y: 910 },
+        spawnP2: { x: 1788, y: 910 }
     }
 };
 
@@ -392,6 +375,7 @@ class Player {
                 this.vy = -this.config.jumpForce;
                 this.angularVelocity = this.facing * 0.35;
             } else {
+                // Controlled Balanced Double Jump (1.5x Reduced)
                 this.vy = -this.config.jumpForce * 0.95;
                 this.angularVelocity = -this.facing * 0.65;
                 createHitParticles(this.x + this.width/2, this.y + this.height, '#ffffff', 14);
@@ -431,7 +415,7 @@ class Player {
         this.comboCount++;
         this.comboResetTimer = 120;
         
-        // HIT-ONLY ULT CHARGE RATIOS (Basic: +12%, Special: +30%)
+        // STRICT HIT-ONLY ULT CHARGE: Basic: +12%, Special: +30%
         if (skillType === 'special') {
             this.gainUlt(30);
         } else {
@@ -1005,19 +989,6 @@ function initGame() {
     particles = [];
     sparks = [];
     comboTexts = [];
-    fancyBackgroundParticles = [];
-
-    if (activeMap.isFancy) {
-        for(let i=0; i<40; i++) {
-            fancyBackgroundParticles.push({
-                x: Math.random() * CANVAS_WIDTH,
-                y: Math.random() * CANVAS_HEIGHT,
-                r: Math.random() * 4 + 2,
-                vy: (Math.random() - 0.5) * 1.5,
-                alpha: Math.random() * 0.8 + 0.2
-            });
-        }
-    }
     
     gameTimer = 99;
     document.getElementById('timer').textContent = gameTimer;
@@ -1176,7 +1147,7 @@ function gameLoop() {
                 if (distToTarget < targetPlayer.height/2 + p.size) {
                     targetPlayer.takeDamage(p.damage);
                     
-                    // HIT-ONLY ULT CHARGE ON PROJECTILE HIT!
+                    // STRICT HIT-ONLY ULT CHARGE ON PROJECTILE HIT!
                     attackerPlayer.registerHitOnOpponent(targetPlayer, p.skillCategory || 'basic');
                     collided = true;
                     
@@ -1215,14 +1186,6 @@ function gameLoop() {
                 if (ct.life <= 0) comboTexts.splice(i, 1);
             }
 
-            if (activeMap.isFancy) {
-                for (let fp of fancyBackgroundParticles) {
-                    fp.y += fp.vy;
-                    if (fp.y < 0) fp.y = CANVAS_HEIGHT;
-                    if (fp.y > CANVAS_HEIGHT) fp.y = 0;
-                }
-            }
-
             if (player1.hp <= 0 || player2.hp <= 0) {
                 endGame();
             }
@@ -1241,25 +1204,6 @@ function gameLoop() {
         ctx.fillStyle = activeMap.background;
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         
-        if (activeMap.isFancy) {
-            let grad = ctx.createLinearGradient(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            grad.addColorStop(0, 'rgba(255, 0, 127, 0.25)');
-            grad.addColorStop(0.5, 'rgba(0, 229, 255, 0.15)');
-            grad.addColorStop(1, 'rgba(168, 0, 255, 0.25)');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-            ctx.fillStyle = '#ffffff';
-            for (let fp of fancyBackgroundParticles) {
-                ctx.save();
-                ctx.globalAlpha = fp.alpha;
-                ctx.beginPath();
-                ctx.arc(fp.x, fp.y, fp.r, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
-        }
-
         ctx.strokeStyle = activeMap.gridColor;
         ctx.lineWidth = 1.5;
         for(let i=0; i<CANVAS_WIDTH; i+=60) {
@@ -1381,14 +1325,14 @@ function setupGridSelect(gridId) {
 setupGridSelect('p1-char-grid');
 setupGridSelect('p2-char-grid');
 
-// SMOOTH 3-COLUMN MAP SELECTION LISTENER
-const mapRow = document.querySelector('.map-horizontal-row');
-if (mapRow) {
-    mapRow.addEventListener('click', e => {
+// 2 MAP SELECTION EVENT LISTENER (With SELECT button sync)
+const mapRowTwo = document.querySelector('.map-horizontal-row-two');
+if (mapRowTwo) {
+    mapRowTwo.addEventListener('click', e => {
         const card = e.target.closest('.map-card');
         if (!card) return;
         
-        mapRow.querySelectorAll('.map-card').forEach(c => {
+        mapRowTwo.querySelectorAll('.map-card').forEach(c => {
             c.classList.remove('active');
             const btn = c.querySelector('.select-map-btn');
             if (btn) btn.textContent = 'SELECT';
