@@ -217,21 +217,48 @@
 
             <div id="map-select" class="screen">
                 <h2 class="section-title">CHOOSE BATTLEFIELD</h2>
-                <div class="map-grid-three">
+                <div class="map-grid-six">
                     <div class="map-card active" data-map="flat">
-                        <div class="map-preview flat-bg"></div>
+                        <div class="map-preview-container">
+                            <canvas class="map-silhouette-canvas" data-map="flat" width="280" height="150"></canvas>
+                        </div>
                         <div class="map-name">FLAT ARENA</div>
-                        <div class="map-desc">Pure ground battle with zero obstacle platforms.</div>
+                        <div class="map-desc">Obstacle-free ground battle arena.</div>
                     </div>
                     <div class="map-card" data-map="classic">
-                        <div class="map-preview classic-bg"></div>
+                        <div class="map-preview-container">
+                            <canvas class="map-silhouette-canvas" data-map="classic" width="280" height="150"></canvas>
+                        </div>
                         <div class="map-name">CLASSIC ARENA</div>
-                        <div class="map-desc">Standard balanced arena with elevated platforms.</div>
+                        <div class="map-desc">Standard balanced triple elevated platforms.</div>
                     </div>
-                    <div class="map-card" data-map="cyber_fancy">
-                        <div class="map-preview fancy-bg"></div>
+                    <div class="map-card" data-map="fancy">
+                        <div class="map-preview-container">
+                            <canvas class="map-silhouette-canvas" data-map="fancy" width="280" height="150"></canvas>
+                        </div>
                         <div class="map-name">FANCY NEON CITY</div>
-                        <div class="map-desc">High-tech arena with spectacular aurora & neon lights.</div>
+                        <div class="map-desc">Spectacular cyberpunk aurora background lights.</div>
+                    </div>
+                    <div class="map-card" data-map="lava">
+                        <div class="map-preview-container">
+                            <canvas class="map-silhouette-canvas" data-map="lava" width="280" height="150"></canvas>
+                        </div>
+                        <div class="map-name">LAVA VOLCANO</div>
+                        <div class="map-desc">Lava bottom hazard that bounces and burns.</div>
+                    </div>
+                    <div class="map-card" data-map="dojo">
+                        <div class="map-preview-container">
+                            <canvas class="map-silhouette-canvas" data-map="dojo" width="280" height="150"></canvas>
+                        </div>
+                        <div class="map-name">MARTIAL DOJO</div>
+                        <div class="map-desc">Traditional bamboo wooden duel platforms.</div>
+                    </div>
+                    <div class="map-card" data-map="space">
+                        <div class="map-preview-container">
+                            <canvas class="map-silhouette-canvas" data-map="space" width="280" height="150"></canvas>
+                        </div>
+                        <div class="map-name">DEEP SPACE</div>
+                        <div class="map-desc">Floating cosmic station with float gravity.</div>
                     </div>
                 </div>
                 <button id="start-game-btn" class="main-btn">FIGHT!</button>

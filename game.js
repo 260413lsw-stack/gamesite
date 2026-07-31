@@ -1,5 +1,5 @@
 // Bounce Attack - Tekken Style Stickman Edition
-// 1.3x Jump Force Scale Up, Reliable 2P Input Fix (I,O,P & e.code), and 3 Distinct Maps (Flat, Classic, Fancy Neon)
+// 1.3x Jump Force Scale Up, 6 Maps Expansion, and Live Map Silhouette Canvas Renderer
 
 const CANVAS_WIDTH = 2048;
 const CANVAS_HEIGHT = 1152;
@@ -26,7 +26,7 @@ let screenShake = 0;
 let hitStopTimer = 0;
 let gameTimer = 99;
 let timerInterval = null;
-let selectedMapKey = 'flat'; // Default selected map
+let selectedMapKey = 'flat';
 
 // --- SOUND CONTROL ---
 const bgm = document.getElementById('bgm');
@@ -53,25 +53,25 @@ function playBgm() {
 }
 
 // --- CHARACTER CONFIGURATIONS ---
-// 점프력 1.3배 추가 상향 (1.2675 * 1.3 = 1.64775)
+// 점프력 1.3배 추가 상향 (1.64775 * 1.3 = 2.142075)
 const CHARACTER_PRESETS = {
-    swordsman: { name: 'SWORDSMAN', icon: 'SW', color: '#ff9500', maxHp: 120, speed: 6.5 * 0.84375, jumpForce: 15.5 * 1.64775, basicDamage: 12, specialDamage: 22, ultDamage: 45, basicCd: 400, specialCd: 1200, ultCd: 4000 },
-    mage: { name: 'MAGE', icon: 'MG', color: '#ff2d55', maxHp: 90, speed: 5.0 * 0.84375, jumpForce: 15.0 * 1.64775, basicDamage: 10, specialDamage: 26, ultDamage: 50, basicCd: 500, specialCd: 1400, ultCd: 4800 },
-    archer: { name: 'ARCHER', icon: 'AR', color: '#4cd964', maxHp: 95, speed: 6.0 * 0.84375, jumpForce: 16.0 * 1.64775, basicDamage: 8, specialDamage: 18, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4200 },
-    rogue: { name: 'ROGUE', icon: 'RG', color: '#bf5af2', maxHp: 90, speed: 8.0 * 0.84375, jumpForce: 17.5 * 1.64775, basicDamage: 11, specialDamage: 20, ultDamage: 38, basicCd: 300, specialCd: 1000, ultCd: 3500 },
-    lancer: { name: 'LANCER', icon: 'LC', color: '#5ac8fa', maxHp: 110, speed: 6.0 * 0.84375, jumpForce: 15.0 * 1.64775, basicDamage: 13, specialDamage: 22, ultDamage: 42, basicCd: 500, specialCd: 1300, ultCd: 4000 },
-    berserker: { name: 'BERSERKER', icon: 'BS', color: '#ff3b30', maxHp: 140, speed: 5.5 * 0.84375, jumpForce: 14.5 * 1.64775, basicDamage: 15, specialDamage: 28, ultDamage: 52, basicCd: 650, specialCd: 1600, ultCd: 4800 },
-    gunner: { name: 'GUNNER', icon: 'GN', color: '#ffcc00', maxHp: 85, speed: 5.5 * 0.84375, jumpForce: 14.0 * 1.64775, basicDamage: 7, specialDamage: 17, ultDamage: 38, basicCd: 220, specialCd: 1000, ultCd: 3800 },
-    ninja: { name: 'NINJA', icon: 'NJ', color: '#00e5ff', maxHp: 90, speed: 7.5 * 0.84375, jumpForce: 16.5 * 1.64775, basicDamage: 9, specialDamage: 19, ultDamage: 38, basicCd: 320, specialCd: 850, ultCd: 3600 },
-    brawler: { name: 'BRAWLER', icon: 'BR', color: '#e040fb', maxHp: 115, speed: 6.5 * 0.84375, jumpForce: 15.0 * 1.64775, basicDamage: 12, specialDamage: 22, ultDamage: 42, basicCd: 380, specialCd: 1100, ultCd: 4000 },
-    necromancer: { name: 'NECROMANCER', icon: 'NC', color: '#8e8e93', maxHp: 95, speed: 4.8 * 0.84375, jumpForce: 14.5 * 1.64775, basicDamage: 9, specialDamage: 22, ultDamage: 45, basicCd: 600, specialCd: 1500, ultCd: 4800 },
-    paladin: { name: 'PALADIN', icon: 'PL', color: '#0a84ff', maxHp: 150, speed: 4.5 * 0.84375, jumpForce: 14.0 * 1.64775, basicDamage: 10, specialDamage: 18, ultDamage: 35, basicCd: 550, specialCd: 1800, ultCd: 4800 },
-    reaper: { name: 'REAPER', icon: 'RP', color: '#34c759', maxHp: 105, speed: 5.5 * 0.84375, jumpForce: 15.0 * 1.64775, basicDamage: 14, specialDamage: 25, ultDamage: 45, basicCd: 550, specialCd: 1300, ultCd: 4200 },
-    vampire: { name: 'VAMPIRE', icon: 'VP', color: '#ff2d55', maxHp: 100, speed: 6.0 * 0.84375, jumpForce: 15.5 * 1.64775, basicDamage: 10, specialDamage: 21, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4000 },
-    alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 1.64775, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
+    swordsman: { name: 'SWORDSMAN', icon: 'SW', color: '#ff9500', maxHp: 120, speed: 6.5 * 0.84375, jumpForce: 15.5 * 2.142, basicDamage: 12, specialDamage: 22, ultDamage: 45, basicCd: 400, specialCd: 1200, ultCd: 4000 },
+    mage: { name: 'MAGE', icon: 'MG', color: '#ff2d55', maxHp: 90, speed: 5.0 * 0.84375, jumpForce: 15.0 * 2.142, basicDamage: 10, specialDamage: 26, ultDamage: 50, basicCd: 500, specialCd: 1400, ultCd: 4800 },
+    archer: { name: 'ARCHER', icon: 'AR', color: '#4cd964', maxHp: 95, speed: 6.0 * 0.84375, jumpForce: 16.0 * 2.142, basicDamage: 8, specialDamage: 18, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4200 },
+    rogue: { name: 'ROGUE', icon: 'RG', color: '#bf5af2', maxHp: 90, speed: 8.0 * 0.84375, jumpForce: 17.5 * 2.142, basicDamage: 11, specialDamage: 20, ultDamage: 38, basicCd: 300, specialCd: 1000, ultCd: 3500 },
+    lancer: { name: 'LANCER', icon: 'LC', color: '#5ac8fa', maxHp: 110, speed: 6.0 * 0.84375, jumpForce: 15.0 * 2.142, basicDamage: 13, specialDamage: 22, ultDamage: 42, basicCd: 500, specialCd: 1300, ultCd: 4000 },
+    berserker: { name: 'BERSERKER', icon: 'BS', color: '#ff3b30', maxHp: 140, speed: 5.5 * 0.84375, jumpForce: 14.5 * 2.142, basicDamage: 15, specialDamage: 28, ultDamage: 52, basicCd: 650, specialCd: 1600, ultCd: 4800 },
+    gunner: { name: 'GUNNER', icon: 'GN', color: '#ffcc00', maxHp: 85, speed: 5.5 * 0.84375, jumpForce: 14.0 * 2.142, basicDamage: 7, specialDamage: 17, ultDamage: 38, basicCd: 220, specialCd: 1000, ultCd: 3800 },
+    ninja: { name: 'NINJA', icon: 'NJ', color: '#00e5ff', maxHp: 90, speed: 7.5 * 0.84375, jumpForce: 16.5 * 2.142, basicDamage: 9, specialDamage: 19, ultDamage: 38, basicCd: 320, specialCd: 850, ultCd: 3600 },
+    brawler: { name: 'BRAWLER', icon: 'BR', color: '#e040fb', maxHp: 115, speed: 6.5 * 0.84375, jumpForce: 15.0 * 2.142, basicDamage: 12, specialDamage: 22, ultDamage: 42, basicCd: 380, specialCd: 1100, ultCd: 4000 },
+    necromancer: { name: 'NECROMANCER', icon: 'NC', color: '#8e8e93', maxHp: 95, speed: 4.8 * 0.84375, jumpForce: 14.5 * 2.142, basicDamage: 9, specialDamage: 22, ultDamage: 45, basicCd: 600, specialCd: 1500, ultCd: 4800 },
+    paladin: { name: 'PALADIN', icon: 'PL', color: '#0a84ff', maxHp: 150, speed: 4.5 * 0.84375, jumpForce: 14.0 * 2.142, basicDamage: 10, specialDamage: 18, ultDamage: 35, basicCd: 550, specialCd: 1800, ultCd: 4800 },
+    reaper: { name: 'REAPER', icon: 'RP', color: '#34c759', maxHp: 105, speed: 5.5 * 0.84375, jumpForce: 15.0 * 2.142, basicDamage: 14, specialDamage: 25, ultDamage: 45, basicCd: 550, specialCd: 1300, ultCd: 4200 },
+    vampire: { name: 'VAMPIRE', icon: 'VP', color: '#ff2d55', maxHp: 100, speed: 6.0 * 0.84375, jumpForce: 15.5 * 2.142, basicDamage: 10, specialDamage: 21, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4000 },
+    alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 2.142, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
 };
 
-// --- 3 REFINED DISTINCT MAPS ---
+// --- 6 DISTINCT MAPS ---
 const MAPS = {
     flat: {
         name: 'FLAT ARENA',
@@ -100,7 +100,7 @@ const MAPS = {
         spawnP1: { x: 300, y: 880 },
         spawnP2: { x: 1748, y: 880 }
     },
-    cyber_fancy: {
+    fancy: {
         name: 'FANCY NEON CITY',
         background: '#060012',
         gridColor: 'rgba(255, 0, 127, 0.18)',
@@ -114,8 +114,108 @@ const MAPS = {
         ],
         spawnP1: { x: 300, y: 880 },
         spawnP2: { x: 1748, y: 880 }
+    },
+    lava: {
+        name: 'LAVA VOLCANO',
+        background: '#1c0505',
+        gridColor: 'rgba(255, 61, 0, 0.14)',
+        gravity: 0.676,
+        isLavaHazard: true,
+        platforms: [
+            { x: 0, y: 1080, w: 2048, h: 72, border: '#ff3d00', fill: '#450a00' },
+            { x: 200, y: 840, w: 450, h: 40, border: '#ff9100', fill: '#280800' },
+            { x: 1398, y: 840, w: 450, h: 40, border: '#ff9100', fill: '#280800' },
+            { x: 724, y: 600, w: 600, h: 40, border: '#ff3d00', fill: '#280800' }
+        ],
+        spawnP1: { x: 300, y: 700 },
+        spawnP2: { x: 1548, y: 700 }
+    },
+    dojo: {
+        name: 'MARTIAL DOJO',
+        background: '#140c08',
+        gridColor: 'rgba(255, 171, 0, 0.09)',
+        gravity: 0.676,
+        platforms: [
+            { x: 0, y: 1060, w: 2048, h: 92, border: '#ffab00', fill: '#2e190e' },
+            { x: 250, y: 760, w: 400, h: 36, border: '#ff6d00', fill: '#2e190e' },
+            { x: 1398, y: 760, w: 400, h: 36, border: '#ff6d00', fill: '#2e190e' },
+            { x: 774, y: 500, w: 500, h: 36, border: '#ffab00', fill: '#2e190e' }
+        ],
+        spawnP1: { x: 250, y: 880 },
+        spawnP2: { x: 1798, y: 880 }
+    },
+    space: {
+        name: 'DEEP SPACE',
+        background: '#040010',
+        gridColor: 'rgba(213, 0, 249, 0.12)',
+        gravity: 0.38,
+        platforms: [
+            { x: 200, y: 980, w: 1648, h: 50, border: '#d500f9', fill: '#14002e' },
+            { x: 400, y: 680, w: 350, h: 32, border: '#00e5ff', fill: '#002033' },
+            { x: 1298, y: 680, w: 350, h: 32, border: '#00e5ff', fill: '#002033' },
+            { x: 774, y: 440, w: 500, h: 32, border: '#d500f9', fill: '#14002e' }
+        ],
+        spawnP1: { x: 350, y: 840 },
+        spawnP2: { x: 1648, y: 840 }
     }
 };
+
+// --- RENDER LIVE SILHOUETTES ON MAP CARDS ---
+function renderMapSilhouettes() {
+    const silhouetteCanvases = document.querySelectorAll('.map-silhouette-canvas');
+    silhouetteCanvases.forEach(canvas => {
+        const mapKey = canvas.dataset.map;
+        const mapConfig = MAPS[mapKey];
+        if (!mapConfig) return;
+
+        const sCtx = canvas.getContext('2d');
+        const cW = canvas.width;
+        const cH = canvas.height;
+        const scaleX = cW / CANVAS_WIDTH;
+        const scaleY = cH / CANVAS_HEIGHT;
+
+        // Background
+        sCtx.fillStyle = mapConfig.background;
+        sCtx.fillRect(0, 0, cW, cH);
+
+        // Fancy Aurora Gradient preview if fancy
+        if (mapConfig.isFancy) {
+            let grad = sCtx.createLinearGradient(0, 0, cW, cH);
+            grad.addColorStop(0, 'rgba(255, 0, 127, 0.3)');
+            grad.addColorStop(1, 'rgba(0, 229, 255, 0.3)');
+            sCtx.fillStyle = grad;
+            sCtx.fillRect(0, 0, cW, cH);
+        }
+
+        // Draw Platform Silhouettes
+        for (let plat of mapConfig.platforms) {
+            let pX = plat.x * scaleX;
+            let pY = plat.y * scaleY;
+            let pW = plat.w * scaleX;
+            let pH = plat.h * scaleY;
+
+            sCtx.fillStyle = plat.fill;
+            sCtx.fillRect(pX, pY, pW, pH);
+
+            sCtx.strokeStyle = plat.border;
+            sCtx.lineWidth = 2.5;
+            sCtx.strokeRect(pX, pY, pW, pH);
+        }
+
+        // Draw Player Spawn Point Silhouettes
+        if (mapConfig.spawnP1 && mapConfig.spawnP2) {
+            sCtx.fillStyle = '#ff0055';
+            sCtx.beginPath();
+            sCtx.arc(mapConfig.spawnP1.x * scaleX, mapConfig.spawnP1.y * scaleY, 4, 0, Math.PI * 2);
+            sCtx.fill();
+
+            sCtx.fillStyle = '#00e5ff';
+            sCtx.beginPath();
+            sCtx.arc(mapConfig.spawnP2.x * scaleX, mapConfig.spawnP2.y * scaleY, 4, 0, Math.PI * 2);
+            sCtx.fill();
+        }
+    });
+}
 
 // --- TEKKEN SPARK IMPACT & COMBO SYSTEM ---
 class TekkenSpark {
@@ -375,6 +475,12 @@ class Player {
                 }
             }
         }
+
+        if (mapConfig.isLavaHazard && this.y >= 1000) {
+            this.takeDamage(1.5);
+            this.vy = -14;
+            createHitParticles(this.x + this.width/2, 1060, '#ff3d00', 10);
+        }
         
         if (this.isAttacking) {
             this.attackTimer--;
@@ -392,7 +498,7 @@ class Player {
                 this.vy = -this.config.jumpForce;
                 this.angularVelocity = this.facing * 0.35;
             } else {
-                // High Powered Double Jump
+                // High Powered Double Jump (1.3x Boosted)
                 this.vy = -this.config.jumpForce * 0.95;
                 this.angularVelocity = -this.facing * 0.65;
                 createHitParticles(this.x + this.width/2, this.y + this.height, '#ffffff', 14);
@@ -1056,7 +1162,7 @@ function endGame() {
     showScreen('game-over-screen');
 }
 
-// Korean IME & Robust Multi-Code Key Mapping
+// Korean IME & Multi-Key Mapping
 const KOREAN_KEYS = {
     'ㅁ': 'a', 'ㄴ': 's', 'ㅇ': 'd', 'ㅈ': 'w',
     'ㅁ': 'A', 'ㄴ': 'S', 'ㅇ': 'D', 'ㅈ': 'W',
@@ -1066,7 +1172,6 @@ const KOREAN_KEYS = {
     'ㅑ': 'I', 'ㅐ': 'O', 'ㅔ': 'P'
 };
 
-// Robust Multi-Code Keyboard Listeners
 window.addEventListener('keydown', e => {
     keys[e.key] = true;
     keys[e.key.toLowerCase()] = true;
@@ -1099,7 +1204,6 @@ window.addEventListener('keyup', e => {
     }
 });
 
-// Process player inputs with robust key checking!
 function handleInputs() {
     if (!player1 || !player2) return;
     
@@ -1141,15 +1245,12 @@ function handleInputs() {
         player2.jump();
         keys['ArrowUp'] = false;
     }
-    // Basic Attack: I
     if (keys['i'] || keys['I'] || keys['KeyI'] || keys['ㅑ']) {
         player2.useBasicAttack(player1);
     }
-    // Special Skill: O
     if (keys['o'] || keys['O'] || keys['KeyO'] || keys['ㅐ']) {
         player2.useSpecialSkill(player1);
     }
-    // Ultimate: P
     if (keys['p'] || keys['P'] || keys['KeyP'] || keys['ㅔ']) {
         player2.useUltimate(player1);
     }
@@ -1247,7 +1348,6 @@ function gameLoop() {
         ctx.fillStyle = activeMap.background;
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         
-        // Render Fancy Aurora BG if Fancy Map!
         if (activeMap.isFancy) {
             let grad = ctx.createLinearGradient(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             grad.addColorStop(0, 'rgba(255, 0, 127, 0.25)');
@@ -1323,6 +1423,10 @@ function showScreen(screenId) {
     });
     const target = document.getElementById(screenId);
     if (target) target.classList.add('active');
+
+    if (screenId === 'map-select') {
+        setTimeout(renderMapSilhouettes, 50);
+    }
 }
 
 function hideAllScreens() {
@@ -1388,7 +1492,7 @@ function setupGridSelect(gridId) {
 setupGridSelect('p1-char-grid');
 setupGridSelect('p2-char-grid');
 
-const mapGrid = document.querySelector('.map-grid-three');
+const mapGrid = document.querySelector('.map-grid-six');
 if (mapGrid) {
     mapGrid.addEventListener('click', e => {
         const card = e.target.closest('.map-card');
@@ -1399,3 +1503,6 @@ if (mapGrid) {
         selectedMapKey = card.dataset.map;
     });
 }
+
+// Initial render of silhouettes on load
+setTimeout(renderMapSilhouettes, 200);
