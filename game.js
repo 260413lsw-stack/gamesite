@@ -1,5 +1,5 @@
 // Bounce Attack - Tekken Style Stickman Edition
-// Boosted 1.5x Jump Force (1.3923 Scale Factor)
+// Web Audio Synth BGM Engine & Slightly Lowered Ground Platforms (+15px Ceiling Headroom Expansion)
 
 const CANVAS_WIDTH = 2048;
 const CANVAS_HEIGHT = 1152;
@@ -27,32 +27,88 @@ let gameTimer = 99;
 let timerInterval = null;
 let selectedMapKey = 'flat';
 
-// --- SOUND CONTROL ---
-const bgm = document.getElementById('bgm');
-const bgmToggle = document.getElementById('bgm-toggle');
+// --- WEB AUDIO SYNTHESIZER BGM ENGINE ---
+let audioCtx = null;
+let bgmInterval = null;
 let bgmPlaying = false;
 
-if (bgmToggle) {
-    bgmToggle.addEventListener('click', () => {
-        if (bgmPlaying) {
-            bgm.pause();
-            bgmToggle.textContent = 'Mute';
-        } else {
-            bgm.play().catch(e => console.log("Audio play blocked."));
-            bgmToggle.textContent = 'Sound On';
-        }
-        bgmPlaying = !bgmPlaying;
-    });
-}
-
-function playBgm() {
-    if (bgmPlaying && bgm) {
-        bgm.play().catch(e => console.log("BGM Play failed:", e));
+function initAudioContext() {
+    if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
     }
 }
 
+const BGM_NOTES = [
+    130.81, 146.83, 164.81, 196.00, 164.81, 146.83, // C3, D3, E3, G3, E3, D3
+    220.00, 196.00, 164.81, 146.83, 130.81, 196.00  // A3, G3, E3, D3, C3, G3
+];
+let noteIdx = 0;
+
+function playSynthNote(freq, type = 'sawtooth', duration = 0.15, gainVal = 0.08) {
+    if (!audioCtx || !bgmPlaying) return;
+    try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    } catch(e) {
+        console.log("Audio play error:", e);
+    }
+}
+
+function startBgm() {
+    initAudioContext();
+    bgmPlaying = true;
+    if (bgmInterval) clearInterval(bgmInterval);
+    
+    noteIdx = 0;
+    bgmInterval = setInterval(() => {
+        if (currentGameState === STATE.PLAYING && bgmPlaying) {
+            let note = BGM_NOTES[noteIdx % BGM_NOTES.length];
+            playSynthNote(note, 'sawtooth', 0.18, 0.07);
+            playSynthNote(note * 0.5, 'square', 0.22, 0.09);
+            
+            if (noteIdx % 4 === 0) {
+                playSynthNote(440.00, 'triangle', 0.1, 0.04);
+            }
+            noteIdx++;
+        }
+    }, 180);
+}
+
+function stopBgm() {
+    bgmPlaying = false;
+    if (bgmInterval) clearInterval(bgmInterval);
+}
+
+const bgmToggle = document.getElementById('bgm-toggle');
+if (bgmToggle) {
+    bgmToggle.addEventListener('click', () => {
+        if (bgmPlaying) {
+            stopBgm();
+            bgmToggle.textContent = 'Mute';
+        } else {
+            startBgm();
+            bgmToggle.textContent = 'Sound On';
+        }
+    });
+}
+
 // --- CHARACTER CONFIGURATIONS ---
-// 점프력 1.5배 늘림 (0.9282 * 1.5 = 1.3923)
 const CHARACTER_PRESETS = {
     swordsman: { name: 'SWORDSMAN', icon: 'SW', color: '#ff9500', maxHp: 120, speed: 6.5 * 0.84375, jumpForce: 15.5 * 1.3923, basicDamage: 12, specialDamage: 22, ultDamage: 45, basicCd: 400, specialCd: 1200, ultCd: 4000 },
     mage: { name: 'MAGE', icon: 'MG', color: '#ff2d55', maxHp: 90, speed: 5.0 * 0.84375, jumpForce: 15.0 * 1.3923, basicDamage: 10, specialDamage: 26, ultDamage: 50, basicCd: 500, specialCd: 1400, ultCd: 4800 },
@@ -70,7 +126,7 @@ const CHARACTER_PRESETS = {
     alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 1.3923, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
 };
 
-// --- 2 REFINED EXPANDED MAPS ---
+// --- 2 REFINED MAPS WITH SLIGHTLY EXPANDED CEILING HEADROOM (+15px Ground Lowered) ---
 const MAPS = {
     flat: {
         name: 'FLAT ARENA',
@@ -78,10 +134,10 @@ const MAPS = {
         gridColor: 'rgba(0, 229, 255, 0.12)',
         gravity: 0.676,
         platforms: [
-            { x: 0, y: 1090, w: 2048, h: 62, border: '#00e5ff', fill: '#0f172a' }
+            { x: 0, y: 1105, w: 2048, h: 47, border: '#00e5ff', fill: '#0f172a' }
         ],
-        spawnP1: { x: 260, y: 910 },
-        spawnP2: { x: 1788, y: 910 }
+        spawnP1: { x: 260, y: 925 },
+        spawnP2: { x: 1788, y: 925 }
     },
     classic: {
         name: 'CLASSIC ARENA',
@@ -89,13 +145,13 @@ const MAPS = {
         gridColor: 'rgba(255, 170, 0, 0.1)',
         gravity: 0.676,
         platforms: [
-            { x: 0, y: 1090, w: 2048, h: 62, border: '#ffaa00', fill: '#1b152b' },
-            { x: 240, y: 850, w: 480, h: 36, border: '#ff0055', fill: '#250f24' },
-            { x: 1328, y: 850, w: 480, h: 36, border: '#ff0055', fill: '#250f24' },
-            { x: 744, y: 620, w: 560, h: 36, border: '#00ffcc', fill: '#1b152b' }
+            { x: 0, y: 1105, w: 2048, h: 47, border: '#ffaa00', fill: '#1b152b' },
+            { x: 240, y: 865, w: 480, h: 36, border: '#ff0055', fill: '#250f24' },
+            { x: 1328, y: 865, w: 480, h: 36, border: '#ff0055', fill: '#250f24' },
+            { x: 744, y: 635, w: 560, h: 36, border: '#00ffcc', fill: '#1b152b' }
         ],
-        spawnP1: { x: 260, y: 910 },
-        spawnP2: { x: 1788, y: 910 }
+        spawnP1: { x: 260, y: 925 },
+        spawnP2: { x: 1788, y: 925 }
     }
 };
 
@@ -337,9 +393,9 @@ class Player {
         
         this.y += this.vy;
 
-        // TOP CEILING CLAMP
-        if (this.y < 0) {
-            this.y = 0;
+        // TOP CEILING CLAMP (SLIGHTLY EXPANDED UPWARD TO -50px)
+        if (this.y < -50) {
+            this.y = -50;
             this.vy = 0;
         }
 
@@ -1289,7 +1345,7 @@ document.getElementById('start-game-btn').addEventListener('click', () => {
     initGame();
     hideAllScreens();
     currentGameState = STATE.PLAYING;
-    playBgm();
+    startBgm();
 });
 
 document.getElementById('restart-btn').addEventListener('click', () => {
