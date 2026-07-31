@@ -1,5 +1,5 @@
-// Bounce Attack - Ragdoll Stickman Edition
-// Physics & 7 Arena Maps Engine
+// Bounce Attack - Tekken Style Stickman Edition
+// Double Jump, Tekken Impact Sparks, Combo System & 7 Selectable Maps
 
 const CANVAS_WIDTH = 2048;
 const CANVAS_HEIGHT = 1152;
@@ -19,9 +19,14 @@ let keys = {};
 let particles = [];
 let projectiles = [];
 let soccerBalls = [];
+let sparks = [];
+let comboTexts = [];
+
 let screenShake = 0;
+let hitStopTimer = 0;
 let gameTimer = 99;
 let timerInterval = null;
+let selectedMapKey = 'cyber'; // Track explicitly selected map
 
 // --- SOUND CONTROL ---
 const bgm = document.getElementById('bgm');
@@ -130,7 +135,7 @@ const MAPS = {
         gravity: 0.676,
         isLavaHazard: true,
         platforms: [
-            { x: 0, y: 1080, w: 2048, h: 72, border: '#ff3d00', fill: '#400a00' }, // Lava bottom
+            { x: 0, y: 1080, w: 2048, h: 72, border: '#ff3d00', fill: '#400a00' },
             { x: 200, y: 840, w: 450, h: 40, border: '#ff9100', fill: '#260800' },
             { x: 1398, y: 840, w: 450, h: 40, border: '#ff9100', fill: '#260800' },
             { x: 724, y: 600, w: 600, h: 40, border: '#ff3d00', fill: '#260800' }
@@ -142,7 +147,7 @@ const MAPS = {
         name: 'DEEP SPACE',
         background: '#040010',
         gridColor: 'rgba(213, 0, 249, 0.12)',
-        gravity: 0.38, // Low Gravity Float!
+        gravity: 0.38,
         platforms: [
             { x: 200, y: 980, w: 1648, h: 50, border: '#d500f9', fill: '#14002e' },
             { x: 400, y: 680, w: 350, h: 32, border: '#00e5ff', fill: '#002033' },
@@ -168,7 +173,72 @@ const MAPS = {
     }
 };
 
-// --- PARTICLE SYSTEM ---
+// --- TEKKEN SPARK IMPACT & COMBO SYSTEM ---
+class TekkenSpark {
+    constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.lines = [];
+        for (let i = 0; i < 12; i++) {
+            let angle = Math.random() * Math.PI * 2;
+            let len = Math.random() * 45 + 15;
+            this.lines.push({ angle, len, curLen: 0 });
+        }
+        this.life = 14;
+    }
+
+    update() {
+        this.life--;
+        for (let l of this.lines) {
+            l.curLen += (l.len - l.curLen) * 0.35;
+        }
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 3.5;
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 15;
+        for (let l of this.lines) {
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.x + Math.cos(l.angle) * l.curLen, this.y + Math.sin(l.angle) * l.curLen);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+}
+
+class ComboText {
+    constructor(x, y, text, color) {
+        this.x = x;
+        this.y = y;
+        this.text = text;
+        this.color = color;
+        this.life = 45;
+        this.scale = 1.6;
+    }
+
+    update() {
+        this.life--;
+        this.y -= 1.2;
+        this.scale = Math.max(1.0, this.scale - 0.04);
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.font = `900 ${Math.round(36 * this.scale)}px Outfit, sans-serif`;
+        ctx.fillStyle = this.color;
+        ctx.shadowColor = '#000000';
+        ctx.shadowBlur = 12;
+        ctx.textAlign = 'center';
+        ctx.fillText(this.text, this.x, this.y);
+        ctx.restore();
+    }
+}
+
 class Particle {
     constructor(x, y, color, speedScale = 1.0) {
         this.x = x;
@@ -251,7 +321,6 @@ class Projectile {
     }
 }
 
-// --- SOCCER BALL BOUNCY ENTITY ---
 class SoccerBall {
     constructor(x, y) {
         this.x = x;
@@ -282,7 +351,6 @@ class SoccerBall {
             }
         }
 
-        // Check collision with players
         for (let p of [p1, p2]) {
             if (!p) continue;
             let dist = Math.hypot(this.x - (p.x + p.width/2), this.y - (p.y + p.height/2));
@@ -290,7 +358,7 @@ class SoccerBall {
                 let angle = Math.atan2(this.y - (p.y + p.height/2), this.x - (p.x + p.width/2));
                 this.vx = Math.cos(angle) * 14;
                 this.vy = Math.sin(angle) * 14;
-                createHitParticles(this.x, this.y, '#ffffff', 10);
+                sparks.push(new TekkenSpark(this.x, this.y, '#00e676'));
             }
         }
     }
@@ -318,7 +386,7 @@ class SoccerBall {
     }
 }
 
-// --- RAGDOLL STICKMAN PLAYER CLASS ---
+// --- PLAYER CLASS (With Universal Double Jump & Tekken Combos) ---
 class Player {
     constructor(id, x, y, charKey) {
         this.id = id;
@@ -336,11 +404,15 @@ class Player {
         
         this.vx = 0;
         this.vy = 0;
-        this.angle = 0; // Acrobatic Ragdoll Body Angle
+        this.angle = 0;
         this.angularVelocity = 0;
         this.isGrounded = false;
         this.facing = id === 1 ? 1 : -1;
-        this.doubleJumpUsed = false;
+        
+        // UNIVERSAL DOUBLE JUMP TRACKER
+        this.jumpsLeft = 2;
+        this.comboCount = 0;
+        this.comboResetTimer = 0;
         
         this.cdBasicLast = 0;
         this.cdSpecialLast = 0;
@@ -372,6 +444,11 @@ class Player {
             if (this.berserkDuration <= 0) this.berserkMode = false;
         }
         
+        if (this.comboResetTimer > 0) {
+            this.comboResetTimer--;
+            if (this.comboResetTimer <= 0) this.comboCount = 0;
+        }
+        
         const currentGravity = mapConfig.gravity || 0.676;
         this.vy += currentGravity;
         this.x += this.vx;
@@ -380,8 +457,9 @@ class Player {
         this.angle += this.angularVelocity;
         
         if (this.isGrounded) {
-            this.angle *= 0.72; // Auto upright recovery when on ground
+            this.angle *= 0.72;
             this.angularVelocity *= 0.6;
+            this.jumpsLeft = 2; // Reset Universal Double Jump
         } else {
             this.angularVelocity *= 0.96;
             if (Math.abs(this.vx) > 0.5) {
@@ -409,15 +487,14 @@ class Player {
                     this.y = plat.y - this.height;
                     this.vy = 0;
                     this.isGrounded = true;
-                    this.doubleJumpUsed = false;
+                    this.jumpsLeft = 2;
                 }
             }
         }
 
-        // Lava Hazard Collision Check
         if (mapConfig.isLavaHazard && this.y >= 1000) {
-            this.takeDamage(1.5); // Continuous tick damage
-            this.vy = -12; // Lava bounce!
+            this.takeDamage(1.5);
+            this.vy = -12;
             createHitParticles(this.x + this.width/2, 1060, '#ff3d00', 10);
         }
         
@@ -431,17 +508,22 @@ class Player {
         this.updateUI();
     }
 
+    // UNIVERSAL DOUBLE JUMP & 360 ACROBATIC FLIP
     jump() {
-        if (this.isGrounded) {
-            this.vy = -this.config.jumpForce;
-            this.angularVelocity = this.facing * 0.35; // 360 Degree Acrobatic Flip!
+        if (this.jumpsLeft > 0) {
+            if (this.jumpsLeft === 2) {
+                // First Ground Jump
+                this.vy = -this.config.jumpForce;
+                this.angularVelocity = this.facing * 0.35;
+            } else {
+                // SECOND AIR DOUBLE JUMP! (360 Acrobatic Flip)
+                this.vy = -this.config.jumpForce * 0.92;
+                this.angularVelocity = -this.facing * 0.65;
+                createHitParticles(this.x + this.width/2, this.y + this.height, '#ffffff', 14);
+                comboTexts.push(new ComboText(this.x + this.width/2, this.y - 20, "DOUBLE FLIP!", "#00e5ff"));
+            }
+            this.jumpsLeft--;
             this.isGrounded = false;
-            createHitParticles(this.x + this.width/2, this.y + this.height, '#ffffff', 10);
-        } else if (this.charKey === 'ninja' && !this.doubleJumpUsed) {
-            this.vy = -this.config.jumpForce * 0.9;
-            this.angularVelocity = -this.facing * 0.45; // Reverse Flip!
-            this.doubleJumpUsed = true;
-            createHitParticles(this.x + this.width/2, this.y + this.height, '#00ffff', 12);
         }
     }
 
@@ -459,13 +541,26 @@ class Player {
         this.hp = Math.max(0, this.hp - dmgTaken);
         
         this.gainUlt(dmgTaken * 0.6);
-        screenShake = 16;
+        screenShake = 22;
+        hitStopTimer = 3; // Tekken Hitstop Freeze!
         
-        // Ragdoll Impact Knockback Rotation
-        this.angularVelocity = -this.facing * 0.5;
-        this.vx = -this.facing * 6;
+        // Tekken Impact Sparks
+        sparks.push(new TekkenSpark(this.x + this.width/2, this.y + this.height/2, '#ffcc00'));
+        sparks.push(new TekkenSpark(this.x + this.width/2, this.y + this.height/2, '#ff3b30'));
+
+        this.angularVelocity = -this.facing * 0.55;
+        this.vx = -this.facing * 7;
         
-        createHitParticles(this.x + this.width/2, this.y + this.height/2, this.config.color, 22);
+        createHitParticles(this.x + this.width/2, this.y + this.height/2, this.config.color, 24);
+    }
+
+    registerHitOnOpponent(opponent, dmg) {
+        this.comboCount++;
+        this.comboResetTimer = 120; // 2 seconds to chain combo
+        
+        if (this.comboCount >= 2) {
+            comboTexts.push(new ComboText(opponent.x + opponent.width/2, opponent.y - 30, `${this.comboCount} HITS!`, this.config.color));
+        }
     }
 
     gainUlt(amount) {
@@ -485,10 +580,10 @@ class Player {
         
         if (this.charKey === 'swordsman' || this.charKey === 'berserker' || this.charKey === 'brawler') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 85, y: this.y + 10, w: 85, h: this.height - 20 };
-            checkMeleeHit(this, opponent, this.config.basicDamage);
+            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, this.config.basicDamage);
         } else if (this.charKey === 'lancer') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 130, y: this.y + 25, w: 130, h: 28 };
-            checkMeleeHit(this, opponent, this.config.basicDamage);
+            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, this.config.basicDamage);
         } else if (this.charKey === 'mage') {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
             projectiles.push(new Projectile(pX, this.y + 30, this.facing, 0, '#ff5500', 10, 11, this.config.basicDamage, this.id));
@@ -506,21 +601,22 @@ class Player {
             projectiles.push(new Projectile(pX, this.y + 28, this.facing, 0, '#bf5af2', 9, 9, this.config.basicDamage, this.id));
         } else if (this.charKey === 'paladin') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 60, y: this.y + 6, w: 60, h: this.height - 12 };
-            checkMeleeHit(this, opponent, this.config.basicDamage);
+            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, this.config.basicDamage);
         } else if (this.charKey === 'reaper') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 100, y: this.y, w: 100, h: this.height };
-            checkMeleeHit(this, opponent, this.config.basicDamage);
+            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, this.config.basicDamage);
         } else if (this.charKey === 'vampire') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 75, y: this.y + 12, w: 75, h: this.height - 24 };
             if (checkMeleeHit(this, opponent, this.config.basicDamage)) {
                 this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.basicDamage * 0.35));
+                this.registerHitOnOpponent(opponent, this.config.basicDamage);
             }
         } else if (this.charKey === 'alchemist') {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
             projectiles.push(new Projectile(pX, this.y + 20, this.facing, -0.15, '#30d158', 8, 11, this.config.basicDamage, this.id));
         } else if (this.charKey === 'rogue') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 65, y: this.y + 18, w: 65, h: this.height - 36 };
-            checkMeleeHit(this, opponent, this.config.basicDamage);
+            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, this.config.basicDamage);
         }
         
         this.gainUlt(8);
@@ -538,7 +634,7 @@ class Player {
             this.isAttacking = true;
             this.attackTimer = 18;
             this.attackBox = { x: this.x - 25, y: this.y, w: this.width + 50, h: this.height };
-            checkMeleeHit(this, opponent, this.config.specialDamage);
+            if (checkMeleeHit(this, opponent, this.config.specialDamage)) this.registerHitOnOpponent(opponent, this.config.specialDamage);
         } 
         else if (this.charKey === 'mage') {
             createExplosion(this.x + this.width/2, this.y + this.height/2, 180, '#ff9500');
@@ -546,6 +642,7 @@ class Player {
             if (dist < 200) {
                 opponent.takeDamage(this.config.specialDamage);
                 opponent.vx = (opponent.x > this.x ? 1 : -1) * 14;
+                this.registerHitOnOpponent(opponent, this.config.specialDamage);
             }
         } 
         else if (this.charKey === 'archer') {
@@ -582,12 +679,14 @@ class Player {
             createHitParticles(oldX + this.width/2, this.y + this.height/2, '#8e8e93', 20);
             createHitParticles(this.x + this.width/2, this.y + this.height/2, '#ff2d55', 20);
             opponent.takeDamage(this.config.specialDamage);
+            this.registerHitOnOpponent(opponent, this.config.specialDamage);
         } 
         else if (this.charKey === 'brawler') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 60, y: this.y - 35, w: 75, h: this.height + 35 };
             if (checkMeleeHit(this, opponent, this.config.specialDamage)) {
                 opponent.vy = -18;
                 opponent.vx = this.facing * 6;
+                this.registerHitOnOpponent(opponent, this.config.specialDamage);
             }
         } 
         else if (this.charKey === 'necromancer') {
@@ -609,6 +708,7 @@ class Player {
             if (Math.abs(this.x - opponent.x) < 140 && Math.abs(this.y - opponent.y) < 90) {
                 opponent.takeDamage(this.config.specialDamage);
                 this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.specialDamage * 0.55));
+                this.registerHitOnOpponent(opponent, this.config.specialDamage);
             }
         } 
         else if (this.charKey === 'alchemist') {
@@ -633,6 +733,7 @@ class Player {
                     this.y = opponent.y - 20;
                     this.angularVelocity = (Math.random() - 0.5) * 0.8;
                     opponent.takeDamage(this.config.ultDamage / 7);
+                    this.registerHitOnOpponent(opponent, this.config.ultDamage / 7);
                     createHitParticles(opponent.x + opponent.width/2, opponent.y + opponent.height/2, '#ff2d55', 20);
                 }, i * 140);
             }
@@ -656,6 +757,7 @@ class Player {
                 let dist = Math.hypot(this.x - opponent.x, this.y - opponent.y);
                 if (dist < 260) {
                     opponent.takeDamage(this.config.ultDamage);
+                    this.registerHitOnOpponent(opponent, this.config.ultDamage);
                     createHitParticles(opponent.x + opponent.width/2, opponent.y + opponent.height/2, '#af52de', 45);
                 }
             }, 90);
@@ -672,6 +774,7 @@ class Player {
                         let dist = Math.hypot((this.x + this.width/2) - (opponent.x + opponent.width/2), (this.y + this.height) - (opponent.y + opponent.height));
                         if (dist < 260) {
                             opponent.takeDamage(this.config.ultDamage);
+                            this.registerHitOnOpponent(opponent, this.config.ultDamage);
                             opponent.vy = -18;
                         }
                     }
@@ -683,6 +786,7 @@ class Player {
             let dist = Math.hypot(this.x - opponent.x, this.y - opponent.y);
             if (dist < 300) {
                 opponent.takeDamage(this.config.ultDamage);
+                this.registerHitOnOpponent(opponent, this.config.ultDamage);
                 opponent.vx = (opponent.x > this.x ? 1 : -1) * 26;
                 opponent.vy = -10;
             }
@@ -712,6 +816,7 @@ class Player {
             if (opponent.y + opponent.height > this.y + 5 && opponent.y < this.y + 55) {
                 if ((this.facing === 1 && opponent.x > this.x) || (this.facing === -1 && opponent.x < this.x)) {
                     opponent.takeDamage(this.config.ultDamage);
+                    this.registerHitOnOpponent(opponent, this.config.ultDamage);
                     opponent.vx = this.facing * 18;
                 }
             }
@@ -730,7 +835,7 @@ class Player {
                 setTimeout(() => {
                     this.vx = this.facing * 10;
                     this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 90, y: this.y, w: 90, h: this.height };
-                    checkMeleeHit(this, opponent, this.config.ultDamage / 6);
+                    if (checkMeleeHit(this, opponent, this.config.ultDamage / 6)) this.registerHitOnOpponent(opponent, this.config.ultDamage / 6);
                 }, i * 100);
             }
         } 
@@ -744,6 +849,7 @@ class Player {
         else if (this.charKey === 'paladin') {
             createExplosion(opponent.x + opponent.width/2, opponent.y + opponent.height/2, 160, '#0a84ff');
             opponent.takeDamage(this.config.ultDamage);
+            this.registerHitOnOpponent(opponent, this.config.ultDamage);
             opponent.vy = 18;
         } 
         else if (this.charKey === 'reaper') {
@@ -753,7 +859,7 @@ class Player {
                 createHitParticles(opponent.x + opponent.width/2, opponent.y + opponent.height/2, '#ff0055', 50);
             }
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 130, y: this.y - 20, w: 130, h: this.height + 40 };
-            checkMeleeHit(this, opponent, baseDmg);
+            if (checkMeleeHit(this, opponent, baseDmg)) this.registerHitOnOpponent(opponent, baseDmg);
         } 
         else if (this.charKey === 'vampire') {
             createExplosion(this.x + this.width/2, this.y + this.height/2, 260, '#ff2d55');
@@ -761,6 +867,7 @@ class Player {
             if (dist < 280) {
                 opponent.takeDamage(this.config.ultDamage);
                 this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.ultDamage * 0.75));
+                this.registerHitOnOpponent(opponent, this.config.ultDamage);
             }
         } 
         else if (this.charKey === 'alchemist') {
@@ -789,7 +896,6 @@ class Player {
         const centerX = this.x + this.width / 2;
         const centerY = this.y + this.height / 2;
 
-        // Apply Ragdoll Body Rotation Transform!
         ctx.translate(centerX, centerY);
         ctx.rotate(this.angle);
 
@@ -801,34 +907,28 @@ class Player {
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        // Relative local coordinates
         const headRadius = 20;
         const headY = -this.height/2 + headRadius + 3;
         const neckY = headY + headRadius;
         const pelvisY = this.height/2 - 26;
 
-        // 1. Head (Solid circle + Head accessory/goggles)
         ctx.beginPath();
         ctx.arc(0, headY, headRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Goggles/Headset Accessory (matching reference image)
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.arc(this.facing * 8, headY - 2, 5, 0, Math.PI * 2);
         ctx.fill();
 
-        // 2. Spine Body
         ctx.beginPath();
         ctx.moveTo(0, neckY);
         ctx.lineTo(0, pelvisY);
         ctx.stroke();
 
-        // 3. Legs + Boots (matching reference image shoes!)
         let legOffset = Math.sin(Date.now() * 0.018) * (Math.abs(this.vx) > 0.1 ? 16 : 3);
         if (!this.isGrounded) legOffset = 14;
 
-        // Left Leg
         let lKneeX = -12 - legOffset * 0.5;
         let lKneeY = pelvisY + 14;
         let lFootX = -15 - legOffset;
@@ -840,7 +940,6 @@ class Player {
         ctx.lineTo(lFootX, lFootY);
         ctx.stroke();
 
-        // Right Leg
         let rKneeX = 12 + legOffset * 0.5;
         let rKneeY = pelvisY + 14;
         let rFootX = 15 + legOffset;
@@ -852,31 +951,26 @@ class Player {
         ctx.lineTo(rFootX, rFootY);
         ctx.stroke();
 
-        // Chunky Boots (Ref Image Red/Blue Shoes)
         ctx.fillStyle = this.id === 1 ? '#ff0055' : '#007aff';
         ctx.fillRect(lFootX - 10, lFootY - 14, 18, 14);
         ctx.fillRect(rFootX - 8, rFootY - 14, 18, 14);
 
-        // 4. Arms
         const shoulderY = neckY + 8;
         const handX = this.facing * 26;
         const handY = shoulderY + (this.isAttacking ? -6 : 12);
 
-        // Back Arm
         ctx.beginPath();
         ctx.moveTo(0, shoulderY);
         ctx.lineTo(-this.facing * 12, shoulderY + 12);
         ctx.lineTo(-this.facing * 20, shoulderY + 24);
         ctx.stroke();
 
-        // Front Arm
         ctx.beginPath();
         ctx.moveTo(0, shoulderY);
         ctx.lineTo(this.facing * 14, shoulderY + (this.isAttacking ? -9 : 6));
         ctx.lineTo(handX, handY);
         ctx.stroke();
 
-        // 5. Weapon
         ctx.save();
         ctx.shadowColor = charColor;
         ctx.shadowBlur = 12;
@@ -929,7 +1023,6 @@ class Player {
 
         ctx.restore();
 
-        // 6. Shield / Special Effects
         if (this.isShielded) {
             ctx.strokeStyle = '#00ffff';
             ctx.lineWidth = 6;
@@ -1012,7 +1105,7 @@ function triggerCooldownUI(playerId, skillType, cdMs) {
     }, 30);
 }
 
-// --- GAME INITIALIZATION ---
+// --- GAME INITIALIZATION & MAP SELECTION ---
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 
@@ -1024,11 +1117,16 @@ let player2 = null;
 let activeMap = MAPS.cyber;
 
 function initGame() {
+    // Explicitly read selected map key from active map card!
+    const activeMapCard = document.querySelector('.map-card.active');
+    if (activeMapCard) {
+        selectedMapKey = activeMapCard.dataset.map;
+    }
+    
     const p1Key = document.querySelector('#p1-char-grid .char-card.active').dataset.char;
     const p2Key = document.querySelector('#p2-char-grid .char-card.active').dataset.char;
-    const mapKey = document.querySelector('.map-card.active').dataset.map;
     
-    activeMap = MAPS[mapKey];
+    activeMap = MAPS[selectedMapKey] || MAPS.cyber;
     
     player1 = new Player(1, activeMap.spawnP1.x, activeMap.spawnP1.y, p1Key);
     player2 = new Player(2, activeMap.spawnP2.x, activeMap.spawnP2.y, p2Key);
@@ -1036,8 +1134,10 @@ function initGame() {
     projectiles = [];
     particles = [];
     soccerBalls = [];
+    sparks = [];
+    comboTexts = [];
 
-    if (mapKey === 'soccer') {
+    if (selectedMapKey === 'soccer') {
         soccerBalls.push(new SoccerBall(CANVAS_WIDTH / 2, 400));
     }
     
@@ -1062,13 +1162,13 @@ function endGame() {
     
     let winText = "TIME UP! DRAW";
     if (player1.hp > player2.hp) {
-        winText = "PLAYER 1 WINS!";
+        winText = "PLAYER 1 WINS! (K.O.)";
     } else if (player2.hp > player1.hp) {
-        winText = "PLAYER 2 WINS!";
+        winText = "PLAYER 2 WINS! (K.O.)";
     } else if (player1.hp === 0 && player2.hp > 0) {
-        winText = "PLAYER 2 WINS!";
+        winText = "PLAYER 2 WINS! (K.O.)";
     } else if (player2.hp === 0 && player1.hp > 0) {
-        winText = "PLAYER 1 WINS!";
+        winText = "PLAYER 1 WINS! (K.O.)";
     }
     
     document.getElementById('winner-text').textContent = winText;
@@ -1162,70 +1262,85 @@ function handleInputs() {
     }
 }
 
-// --- CANVAS RENDERING ENGINE ---
+// --- CANVAS RENDERING ENGINE (TEKKEN IMPACT & FREEZE) ---
 function gameLoop() {
     if (currentGameState === STATE.PLAYING) {
-        handleInputs();
-        
-        player1.update(activeMap.platforms, activeMap);
-        player2.update(activeMap.platforms, activeMap);
+        // Tekken Hitstop Freeze Frame Logic
+        if (hitStopTimer > 0) {
+            hitStopTimer--;
+        } else {
+            handleInputs();
+            player1.update(activeMap.platforms, activeMap);
+            player2.update(activeMap.platforms, activeMap);
 
-        if (activeMap === MAPS.sky) {
-            if (player1.y > CANVAS_HEIGHT) player1.takeDamage(999);
-            if (player2.y > CANVAS_HEIGHT) player2.takeDamage(999);
-        }
+            if (activeMap === MAPS.sky) {
+                if (player1.y > CANVAS_HEIGHT) player1.takeDamage(999);
+                if (player2.y > CANVAS_HEIGHT) player2.takeDamage(999);
+            }
 
-        // Update Soccer Balls if Soccer Stadium Map
-        for (let ball of soccerBalls) {
-            ball.update(activeMap.platforms, player1, player2);
-        }
+            for (let ball of soccerBalls) {
+                ball.update(activeMap.platforms, player1, player2);
+            }
 
-        // Update Projectiles
-        for (let i = projectiles.length - 1; i >= 0; i--) {
-            let p = projectiles[i];
-            p.update();
-            
-            let collided = false;
-            for (let plat of activeMap.platforms) {
-                if (p.x > plat.x && p.x < plat.x + plat.w && p.y > plat.y && p.y < plat.y + plat.h) {
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                let p = projectiles[i];
+                p.update();
+                
+                let collided = false;
+                for (let plat of activeMap.platforms) {
+                    if (p.x > plat.x && p.x < plat.x + plat.w && p.y > plat.y && p.y < plat.y + plat.h) {
+                        collided = true;
+                        break;
+                    }
+                }
+
+                let targetPlayer = p.owner === 1 ? player2 : player1;
+                let attackerPlayer = p.owner === 1 ? player1 : player2;
+                let distToTarget = Math.hypot(p.x - (targetPlayer.x + targetPlayer.width/2), p.y - (targetPlayer.y + targetPlayer.height/2));
+                
+                if (distToTarget < targetPlayer.height/2 + p.size) {
+                    targetPlayer.takeDamage(p.damage);
+                    attackerPlayer.registerHitOnOpponent(targetPlayer, p.damage);
                     collided = true;
-                    break;
+                    
+                    if (p.type === 'bomb') {
+                        createExplosion(p.x, p.y, 120, p.color);
+                    }
+                    
+                    if (p.type === 'absorb') {
+                        let ownerPlayer = p.owner === 1 ? player1 : player2;
+                        ownerPlayer.hp = Math.min(ownerPlayer.maxHp, ownerPlayer.hp + Math.round(p.damage * 0.7));
+                    }
+                }
+
+                if (collided || p.life <= 0) {
+                    projectiles.splice(i, 1);
                 }
             }
 
-            let targetPlayer = p.owner === 1 ? player2 : player1;
-            let distToTarget = Math.hypot(p.x - (targetPlayer.x + targetPlayer.width/2), p.y - (targetPlayer.y + targetPlayer.height/2));
-            
-            if (distToTarget < targetPlayer.height/2 + p.size) {
-                targetPlayer.takeDamage(p.damage);
-                collided = true;
-                
-                if (p.type === 'bomb') {
-                    createExplosion(p.x, p.y, 120, p.color);
-                }
-                
-                if (p.type === 'absorb') {
-                    let ownerPlayer = p.owner === 1 ? player1 : player2;
-                    ownerPlayer.hp = Math.min(ownerPlayer.maxHp, ownerPlayer.hp + Math.round(p.damage * 0.7));
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let part = particles[i];
+                part.update();
+                if (part.alpha <= 0) {
+                    particles.splice(i, 1);
                 }
             }
 
-            if (collided || p.life <= 0) {
-                projectiles.splice(i, 1);
+            for (let i = sparks.length - 1; i >= 0; i--) {
+                let sp = sparks[i];
+                sp.update();
+                if (sp.life <= 0) sparks.splice(i, 1);
             }
-        }
 
-        // Update Particles
-        for (let i = particles.length - 1; i >= 0; i--) {
-            let part = particles[i];
-            part.update();
-            if (part.alpha <= 0) {
-                particles.splice(i, 1);
+            for (let i = comboTexts.length - 1; i >= 0; i--) {
+                let ct = comboTexts[i];
+                ct.update();
+                if (ct.life <= 0) comboTexts.splice(i, 1);
             }
-        }
 
-        if (player1.hp <= 0 || player2.hp <= 0) {
-            endGame();
+            if (player1.hp <= 0 || player2.hp <= 0) {
+                endGame();
+            }
         }
 
         // Clear & Draw
@@ -1239,11 +1354,9 @@ function gameLoop() {
             if (screenShake < 0.5) screenShake = 0;
         }
 
-        // Background
         ctx.fillStyle = activeMap.background;
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         
-        // Grid effect
         ctx.strokeStyle = activeMap.gridColor;
         ctx.lineWidth = 1.5;
         for(let i=0; i<CANVAS_WIDTH; i+=60) {
@@ -1253,7 +1366,6 @@ function gameLoop() {
             ctx.stroke();
         }
 
-        // Platforms
         for (let plat of activeMap.platforms) {
             ctx.save();
             ctx.fillStyle = plat.fill;
@@ -1267,12 +1379,10 @@ function gameLoop() {
             ctx.restore();
         }
 
-        // Render Soccer Balls
         for (let ball of soccerBalls) {
             ball.draw(ctx);
         }
 
-        // Render Entities
         player1.draw(ctx);
         player2.draw(ctx);
 
@@ -1284,6 +1394,14 @@ function gameLoop() {
             part.draw(ctx);
         }
 
+        for (let sp of sparks) {
+            sp.draw(ctx);
+        }
+
+        for (let ct of comboTexts) {
+            ct.draw(ctx);
+        }
+
         ctx.restore();
     }
 
@@ -1292,7 +1410,7 @@ function gameLoop() {
 
 requestAnimationFrame(gameLoop);
 
-// --- SCREEN SWITCHER UTILS ---
+// --- SCREEN SWITCHER & MAP SELECTION UTILS ---
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(scr => {
         scr.classList.remove('active');
@@ -1364,11 +1482,15 @@ function setupGridSelect(gridId) {
 setupGridSelect('p1-char-grid');
 setupGridSelect('p2-char-grid');
 
+// MAP SELECTION EVENT LISTENER (Ensures user selected map is active!)
 const mapGrid = document.querySelector('.map-grid');
-mapGrid.addEventListener('click', e => {
-    const card = e.target.closest('.map-card');
-    if (!card) return;
-    
-    mapGrid.querySelectorAll('.map-card').forEach(c => c.classList.remove('active'));
-    card.classList.add('active');
-});
+if (mapGrid) {
+    mapGrid.addEventListener('click', e => {
+        const card = e.target.closest('.map-card');
+        if (!card) return;
+        
+        mapGrid.querySelectorAll('.map-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        selectedMapKey = card.dataset.map;
+    });
+}
