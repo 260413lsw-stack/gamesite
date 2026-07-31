@@ -1,5 +1,5 @@
 // Bounce Attack - Tekken Style Stickman Edition
-// Web Audio Synth BGM Engine & Slightly Lowered Ground Platforms (+15px Ceiling Headroom Expansion)
+// Expanded Ceiling Headroom (Ground: Y=1125, Ceiling Boundary: Y=-120)
 
 const CANVAS_WIDTH = 2048;
 const CANVAS_HEIGHT = 1152;
@@ -43,8 +43,8 @@ function initAudioContext() {
 }
 
 const BGM_NOTES = [
-    130.81, 146.83, 164.81, 196.00, 164.81, 146.83, // C3, D3, E3, G3, E3, D3
-    220.00, 196.00, 164.81, 146.83, 130.81, 196.00  // A3, G3, E3, D3, C3, G3
+    130.81, 146.83, 164.81, 196.00, 164.81, 146.83,
+    220.00, 196.00, 164.81, 146.83, 130.81, 196.00
 ];
 let noteIdx = 0;
 
@@ -126,7 +126,7 @@ const CHARACTER_PRESETS = {
     alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 1.3923, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
 };
 
-// --- 2 REFINED MAPS WITH SLIGHTLY EXPANDED CEILING HEADROOM (+15px Ground Lowered) ---
+// --- 2 REFINED MAPS WITH EXPANDED CEILING HEADROOM (Ground: Y=1125) ---
 const MAPS = {
     flat: {
         name: 'FLAT ARENA',
@@ -134,10 +134,10 @@ const MAPS = {
         gridColor: 'rgba(0, 229, 255, 0.12)',
         gravity: 0.676,
         platforms: [
-            { x: 0, y: 1105, w: 2048, h: 47, border: '#00e5ff', fill: '#0f172a' }
+            { x: 0, y: 1125, w: 2048, h: 27, border: '#00e5ff', fill: '#0f172a' }
         ],
-        spawnP1: { x: 260, y: 925 },
-        spawnP2: { x: 1788, y: 925 }
+        spawnP1: { x: 260, y: 945 },
+        spawnP2: { x: 1788, y: 945 }
     },
     classic: {
         name: 'CLASSIC ARENA',
@@ -145,13 +145,13 @@ const MAPS = {
         gridColor: 'rgba(255, 170, 0, 0.1)',
         gravity: 0.676,
         platforms: [
-            { x: 0, y: 1105, w: 2048, h: 47, border: '#ffaa00', fill: '#1b152b' },
-            { x: 240, y: 865, w: 480, h: 36, border: '#ff0055', fill: '#250f24' },
-            { x: 1328, y: 865, w: 480, h: 36, border: '#ff0055', fill: '#250f24' },
-            { x: 744, y: 635, w: 560, h: 36, border: '#00ffcc', fill: '#1b152b' }
+            { x: 0, y: 1125, w: 2048, h: 27, border: '#ffaa00', fill: '#1b152b' },
+            { x: 240, y: 885, w: 480, h: 36, border: '#ff0055', fill: '#250f24' },
+            { x: 1328, y: 885, w: 480, h: 36, border: '#ff0055', fill: '#250f24' },
+            { x: 744, y: 655, w: 560, h: 36, border: '#00ffcc', fill: '#1b152b' }
         ],
-        spawnP1: { x: 260, y: 925 },
-        spawnP2: { x: 1788, y: 925 }
+        spawnP1: { x: 260, y: 945 },
+        spawnP2: { x: 1788, y: 945 }
     }
 };
 
@@ -393,9 +393,9 @@ class Player {
         
         this.y += this.vy;
 
-        // TOP CEILING CLAMP (SLIGHTLY EXPANDED UPWARD TO -50px)
-        if (this.y < -50) {
-            this.y = -50;
+        // TOP CEILING CLAMP (SLIGHTLY EXPANDED UPWARD TO -120px)
+        if (this.y < -120) {
+            this.y = -120;
             this.vy = 0;
         }
 
