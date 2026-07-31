@@ -1,5 +1,5 @@
 // Bounce Attack - Tekken Style Stickman Edition
-// Double Jump, Tekken Impact Sparks, Combo System & 7 Selectable Maps
+// Ceiling Boundary Clamp, Basic Attack Ult Charge Removed, P2 Controls set to I, O, P
 
 const CANVAS_WIDTH = 2048;
 const CANVAS_HEIGHT = 1152;
@@ -26,7 +26,7 @@ let screenShake = 0;
 let hitStopTimer = 0;
 let gameTimer = 99;
 let timerInterval = null;
-let selectedMapKey = 'cyber'; // Track explicitly selected map
+let selectedMapKey = 'cyber';
 
 // --- SOUND CONTROL ---
 const bgm = document.getElementById('bgm');
@@ -70,7 +70,7 @@ const CHARACTER_PRESETS = {
     alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 1.2675, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
 };
 
-// --- 7 DISTINCT BATTLEFIELD MAPS ---
+// --- 7 DISTINCT BATTLEFIELD MAPS (High Overhead Space) ---
 const MAPS = {
     cyber: {
         name: 'CYBER CITY',
@@ -386,7 +386,7 @@ class SoccerBall {
     }
 }
 
-// --- PLAYER CLASS (With Universal Double Jump & Tekken Combos) ---
+// --- PLAYER CLASS ---
 class Player {
     constructor(id, x, y, charKey) {
         this.id = id;
@@ -409,7 +409,6 @@ class Player {
         this.isGrounded = false;
         this.facing = id === 1 ? 1 : -1;
         
-        // UNIVERSAL DOUBLE JUMP TRACKER
         this.jumpsLeft = 2;
         this.comboCount = 0;
         this.comboResetTimer = 0;
@@ -459,7 +458,7 @@ class Player {
         if (this.isGrounded) {
             this.angle *= 0.72;
             this.angularVelocity *= 0.6;
-            this.jumpsLeft = 2; // Reset Universal Double Jump
+            this.jumpsLeft = 2;
         } else {
             this.angularVelocity *= 0.96;
             if (Math.abs(this.vx) > 0.5) {
@@ -467,6 +466,7 @@ class Player {
             }
         }
 
+        // Horizontal Wall Clamping
         if (this.x < 0) {
             this.x = 0;
             this.vx = 0;
@@ -476,6 +476,13 @@ class Player {
         }
         
         this.y += this.vy;
+
+        // TOP CEILING BOUNDARY CLAMP (Prevents double jumping out of screen!)
+        if (this.y < 0) {
+            this.y = 0;
+            this.vy = 0;
+        }
+
         this.isGrounded = false;
 
         for (let plat of platforms) {
@@ -508,15 +515,13 @@ class Player {
         this.updateUI();
     }
 
-    // UNIVERSAL DOUBLE JUMP & 360 ACROBATIC FLIP
     jump() {
         if (this.jumpsLeft > 0) {
             if (this.jumpsLeft === 2) {
-                // First Ground Jump
                 this.vy = -this.config.jumpForce;
                 this.angularVelocity = this.facing * 0.35;
             } else {
-                // SECOND AIR DOUBLE JUMP! (360 Acrobatic Flip)
+                // Double Jump Acrobatics
                 this.vy = -this.config.jumpForce * 0.92;
                 this.angularVelocity = -this.facing * 0.65;
                 createHitParticles(this.x + this.width/2, this.y + this.height, '#ffffff', 14);
@@ -542,9 +547,8 @@ class Player {
         
         this.gainUlt(dmgTaken * 0.6);
         screenShake = 22;
-        hitStopTimer = 3; // Tekken Hitstop Freeze!
+        hitStopTimer = 3;
         
-        // Tekken Impact Sparks
         sparks.push(new TekkenSpark(this.x + this.width/2, this.y + this.height/2, '#ffcc00'));
         sparks.push(new TekkenSpark(this.x + this.width/2, this.y + this.height/2, '#ff3b30'));
 
@@ -556,7 +560,7 @@ class Player {
 
     registerHitOnOpponent(opponent, dmg) {
         this.comboCount++;
-        this.comboResetTimer = 120; // 2 seconds to chain combo
+        this.comboResetTimer = 120;
         
         if (this.comboCount >= 2) {
             comboTexts.push(new ComboText(opponent.x + opponent.width/2, opponent.y - 30, `${this.comboCount} HITS!`, this.config.color));
@@ -619,7 +623,7 @@ class Player {
             if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, this.config.basicDamage);
         }
         
-        this.gainUlt(8);
+        // NO ULT CHARGE ON BASIC ATTACK AS REQUESTED!
         triggerCooldownUI(this.id, 'basic', cd);
     }
 
@@ -1117,7 +1121,6 @@ let player2 = null;
 let activeMap = MAPS.cyber;
 
 function initGame() {
-    // Explicitly read selected map key from active map card!
     const activeMapCard = document.querySelector('.map-card.active');
     if (activeMapCard) {
         selectedMapKey = activeMapCard.dataset.map;
@@ -1175,12 +1178,14 @@ function endGame() {
     showScreen('game-over-screen');
 }
 
-// Korean IME Key Mapping
+// Korean IME Key Mapping (P1: WASD+E/R/F, P2: Arrows + I/O/P)
 const KOREAN_KEYS = {
     'ㅁ': 'a', 'ㄴ': 's', 'ㅇ': 'd', 'ㅈ': 'w',
     'ㅁ': 'A', 'ㄴ': 'S', 'ㅇ': 'D', 'ㅈ': 'W',
     'ㄷ': 'e', 'ㄱ': 'r', 'ㄹ': 'f',
-    'ㄷ': 'E', 'ㄱ': 'R', 'ㄹ': 'F'
+    'ㄷ': 'E', 'ㄱ': 'R', 'ㄹ': 'F',
+    'ㅑ': 'i', 'ㅐ': 'o', 'ㅔ': 'p',
+    'ㅑ': 'I', 'ㅐ': 'O', 'ㅔ': 'P'
 };
 
 // Keyboard Listeners
@@ -1237,7 +1242,7 @@ function handleInputs() {
         player1.useUltimate(player2);
     }
 
-    // --- PLAYER 2 INPUTS (Arrows + . / Shift) ---
+    // --- PLAYER 2 INPUTS (Arrows + I/O/P) ---
     player2.vx = 0;
     if (keys['ArrowLeft']) {
         player2.vx = -player2.config.speed;
@@ -1251,21 +1256,23 @@ function handleInputs() {
         player2.jump();
         keys['ArrowUp'] = false;
     }
-    if (keys['.'] || keys['>']) {
+    // Basic Attack: I
+    if (keys['i'] || keys['I']) {
         player2.useBasicAttack(player1);
     }
-    if (keys['/'] || keys['?']) {
+    // Special Skill: O
+    if (keys['o'] || keys['O']) {
         player2.useSpecialSkill(player1);
     }
-    if (keys['Shift'] || keys['shift']) {
+    // Ultimate: P
+    if (keys['p'] || keys['P']) {
         player2.useUltimate(player1);
     }
 }
 
-// --- CANVAS RENDERING ENGINE (TEKKEN IMPACT & FREEZE) ---
+// --- CANVAS RENDERING ENGINE ---
 function gameLoop() {
     if (currentGameState === STATE.PLAYING) {
-        // Tekken Hitstop Freeze Frame Logic
         if (hitStopTimer > 0) {
             hitStopTimer--;
         } else {
@@ -1343,7 +1350,6 @@ function gameLoop() {
             }
         }
 
-        // Clear & Draw
         ctx.save();
         
         if (screenShake > 0) {
@@ -1482,7 +1488,6 @@ function setupGridSelect(gridId) {
 setupGridSelect('p1-char-grid');
 setupGridSelect('p2-char-grid');
 
-// MAP SELECTION EVENT LISTENER (Ensures user selected map is active!)
 const mapGrid = document.querySelector('.map-grid');
 if (mapGrid) {
     mapGrid.addEventListener('click', e => {
