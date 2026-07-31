@@ -1,5 +1,5 @@
 // Bounce Attack - Tekken Style Stickman Edition
-// 1.3x Jump Force Scale Up, 6 Maps Expansion, and Live Map Silhouette Canvas Renderer
+// Fixed 3 Horizontal Maps (Flat, Classic, Fancy) with 100% Reliable SVG Silhouette Map Selection
 
 const CANVAS_WIDTH = 2048;
 const CANVAS_HEIGHT = 1152;
@@ -26,7 +26,7 @@ let screenShake = 0;
 let hitStopTimer = 0;
 let gameTimer = 99;
 let timerInterval = null;
-let selectedMapKey = 'flat';
+let selectedMapKey = 'flat'; // Default active map
 
 // --- SOUND CONTROL ---
 const bgm = document.getElementById('bgm');
@@ -53,7 +53,7 @@ function playBgm() {
 }
 
 // --- CHARACTER CONFIGURATIONS ---
-// 점프력 1.3배 추가 상향 (1.64775 * 1.3 = 2.142075)
+// High Powered Jump Force Scale (2.142075)
 const CHARACTER_PRESETS = {
     swordsman: { name: 'SWORDSMAN', icon: 'SW', color: '#ff9500', maxHp: 120, speed: 6.5 * 0.84375, jumpForce: 15.5 * 2.142, basicDamage: 12, specialDamage: 22, ultDamage: 45, basicCd: 400, specialCd: 1200, ultCd: 4000 },
     mage: { name: 'MAGE', icon: 'MG', color: '#ff2d55', maxHp: 90, speed: 5.0 * 0.84375, jumpForce: 15.0 * 2.142, basicDamage: 10, specialDamage: 26, ultDamage: 50, basicCd: 500, specialCd: 1400, ultCd: 4800 },
@@ -71,7 +71,7 @@ const CHARACTER_PRESETS = {
     alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 2.142, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
 };
 
-// --- 6 DISTINCT MAPS ---
+// --- 3 REFINED HORIZONTAL MAPS ---
 const MAPS = {
     flat: {
         name: 'FLAT ARENA',
@@ -114,108 +114,8 @@ const MAPS = {
         ],
         spawnP1: { x: 300, y: 880 },
         spawnP2: { x: 1748, y: 880 }
-    },
-    lava: {
-        name: 'LAVA VOLCANO',
-        background: '#1c0505',
-        gridColor: 'rgba(255, 61, 0, 0.14)',
-        gravity: 0.676,
-        isLavaHazard: true,
-        platforms: [
-            { x: 0, y: 1080, w: 2048, h: 72, border: '#ff3d00', fill: '#450a00' },
-            { x: 200, y: 840, w: 450, h: 40, border: '#ff9100', fill: '#280800' },
-            { x: 1398, y: 840, w: 450, h: 40, border: '#ff9100', fill: '#280800' },
-            { x: 724, y: 600, w: 600, h: 40, border: '#ff3d00', fill: '#280800' }
-        ],
-        spawnP1: { x: 300, y: 700 },
-        spawnP2: { x: 1548, y: 700 }
-    },
-    dojo: {
-        name: 'MARTIAL DOJO',
-        background: '#140c08',
-        gridColor: 'rgba(255, 171, 0, 0.09)',
-        gravity: 0.676,
-        platforms: [
-            { x: 0, y: 1060, w: 2048, h: 92, border: '#ffab00', fill: '#2e190e' },
-            { x: 250, y: 760, w: 400, h: 36, border: '#ff6d00', fill: '#2e190e' },
-            { x: 1398, y: 760, w: 400, h: 36, border: '#ff6d00', fill: '#2e190e' },
-            { x: 774, y: 500, w: 500, h: 36, border: '#ffab00', fill: '#2e190e' }
-        ],
-        spawnP1: { x: 250, y: 880 },
-        spawnP2: { x: 1798, y: 880 }
-    },
-    space: {
-        name: 'DEEP SPACE',
-        background: '#040010',
-        gridColor: 'rgba(213, 0, 249, 0.12)',
-        gravity: 0.38,
-        platforms: [
-            { x: 200, y: 980, w: 1648, h: 50, border: '#d500f9', fill: '#14002e' },
-            { x: 400, y: 680, w: 350, h: 32, border: '#00e5ff', fill: '#002033' },
-            { x: 1298, y: 680, w: 350, h: 32, border: '#00e5ff', fill: '#002033' },
-            { x: 774, y: 440, w: 500, h: 32, border: '#d500f9', fill: '#14002e' }
-        ],
-        spawnP1: { x: 350, y: 840 },
-        spawnP2: { x: 1648, y: 840 }
     }
 };
-
-// --- RENDER LIVE SILHOUETTES ON MAP CARDS ---
-function renderMapSilhouettes() {
-    const silhouetteCanvases = document.querySelectorAll('.map-silhouette-canvas');
-    silhouetteCanvases.forEach(canvas => {
-        const mapKey = canvas.dataset.map;
-        const mapConfig = MAPS[mapKey];
-        if (!mapConfig) return;
-
-        const sCtx = canvas.getContext('2d');
-        const cW = canvas.width;
-        const cH = canvas.height;
-        const scaleX = cW / CANVAS_WIDTH;
-        const scaleY = cH / CANVAS_HEIGHT;
-
-        // Background
-        sCtx.fillStyle = mapConfig.background;
-        sCtx.fillRect(0, 0, cW, cH);
-
-        // Fancy Aurora Gradient preview if fancy
-        if (mapConfig.isFancy) {
-            let grad = sCtx.createLinearGradient(0, 0, cW, cH);
-            grad.addColorStop(0, 'rgba(255, 0, 127, 0.3)');
-            grad.addColorStop(1, 'rgba(0, 229, 255, 0.3)');
-            sCtx.fillStyle = grad;
-            sCtx.fillRect(0, 0, cW, cH);
-        }
-
-        // Draw Platform Silhouettes
-        for (let plat of mapConfig.platforms) {
-            let pX = plat.x * scaleX;
-            let pY = plat.y * scaleY;
-            let pW = plat.w * scaleX;
-            let pH = plat.h * scaleY;
-
-            sCtx.fillStyle = plat.fill;
-            sCtx.fillRect(pX, pY, pW, pH);
-
-            sCtx.strokeStyle = plat.border;
-            sCtx.lineWidth = 2.5;
-            sCtx.strokeRect(pX, pY, pW, pH);
-        }
-
-        // Draw Player Spawn Point Silhouettes
-        if (mapConfig.spawnP1 && mapConfig.spawnP2) {
-            sCtx.fillStyle = '#ff0055';
-            sCtx.beginPath();
-            sCtx.arc(mapConfig.spawnP1.x * scaleX, mapConfig.spawnP1.y * scaleY, 4, 0, Math.PI * 2);
-            sCtx.fill();
-
-            sCtx.fillStyle = '#00e5ff';
-            sCtx.beginPath();
-            sCtx.arc(mapConfig.spawnP2.x * scaleX, mapConfig.spawnP2.y * scaleY, 4, 0, Math.PI * 2);
-            sCtx.fill();
-        }
-    });
-}
 
 // --- TEKKEN SPARK IMPACT & COMBO SYSTEM ---
 class TekkenSpark {
@@ -475,12 +375,6 @@ class Player {
                 }
             }
         }
-
-        if (mapConfig.isLavaHazard && this.y >= 1000) {
-            this.takeDamage(1.5);
-            this.vy = -14;
-            createHitParticles(this.x + this.width/2, 1060, '#ff3d00', 10);
-        }
         
         if (this.isAttacking) {
             this.attackTimer--;
@@ -498,7 +392,7 @@ class Player {
                 this.vy = -this.config.jumpForce;
                 this.angularVelocity = this.facing * 0.35;
             } else {
-                // High Powered Double Jump (1.3x Boosted)
+                // High Powered Double Jump
                 this.vy = -this.config.jumpForce * 0.95;
                 this.angularVelocity = -this.facing * 0.65;
                 createHitParticles(this.x + this.width/2, this.y + this.height, '#ffffff', 14);
@@ -1423,10 +1317,6 @@ function showScreen(screenId) {
     });
     const target = document.getElementById(screenId);
     if (target) target.classList.add('active');
-
-    if (screenId === 'map-select') {
-        setTimeout(renderMapSilhouettes, 50);
-    }
 }
 
 function hideAllScreens() {
@@ -1492,17 +1382,15 @@ function setupGridSelect(gridId) {
 setupGridSelect('p1-char-grid');
 setupGridSelect('p2-char-grid');
 
-const mapGrid = document.querySelector('.map-grid-six');
-if (mapGrid) {
-    mapGrid.addEventListener('click', e => {
+// 3 HORIZONTAL MAP SELECTION EVENT LISTENER
+const mapRow = document.querySelector('.map-horizontal-row');
+if (mapRow) {
+    mapRow.addEventListener('click', e => {
         const card = e.target.closest('.map-card');
         if (!card) return;
         
-        mapGrid.querySelectorAll('.map-card').forEach(c => c.classList.remove('active'));
+        mapRow.querySelectorAll('.map-card').forEach(c => c.classList.remove('active'));
         card.classList.add('active');
         selectedMapKey = card.dataset.map;
     });
 }
-
-// Initial render of silhouettes on load
-setTimeout(renderMapSilhouettes, 200);

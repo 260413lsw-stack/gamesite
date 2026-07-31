@@ -216,49 +216,68 @@
             </div>
 
             <div id="map-select" class="screen">
-                <h2 class="section-title">CHOOSE BATTLEFIELD</h2>
-                <div class="map-grid-six">
+                <h2 class="section-title">SELECT BATTLEFIELD</h2>
+                <div class="map-horizontal-row">
                     <div class="map-card active" data-map="flat">
-                        <div class="map-preview-container">
-                            <canvas class="map-silhouette-canvas" data-map="flat" width="280" height="150"></canvas>
+                        <div class="map-preview-box">
+                            <svg class="map-silhouette-svg" viewBox="0 0 2048 1152">
+                                <rect x="0" y="0" width="2048" height="1152" fill="#090d16"/>
+                                <!-- Grid Lines -->
+                                <line x1="0" y1="1060" x2="2048" y2="1060" stroke="#00e5ff" stroke-width="8"/>
+                                <!-- Ground Platform -->
+                                <rect x="0" y="1060" width="2048" height="92" fill="#0f172a" stroke="#00e5ff" stroke-width="12"/>
+                                <!-- Spawns -->
+                                <circle cx="300" cy="880" r="40" fill="#ff0055"/>
+                                <circle cx="1748" cy="880" r="40" fill="#00e5ff"/>
+                            </svg>
                         </div>
                         <div class="map-name">FLAT ARENA</div>
-                        <div class="map-desc">Obstacle-free ground battle arena.</div>
+                        <div class="map-desc">Obstacle-free pure ground battlefield</div>
                     </div>
+
                     <div class="map-card" data-map="classic">
-                        <div class="map-preview-container">
-                            <canvas class="map-silhouette-canvas" data-map="classic" width="280" height="150"></canvas>
+                        <div class="map-preview-box">
+                            <svg class="map-silhouette-svg" viewBox="0 0 2048 1152">
+                                <rect x="0" y="0" width="2048" height="1152" fill="#0e0b1a"/>
+                                <!-- Ground Platform -->
+                                <rect x="0" y="1060" width="2048" height="92" fill="#1b152b" stroke="#ffaa00" stroke-width="12"/>
+                                <!-- Elevated Platforms -->
+                                <rect x="300" y="780" width="440" height="36" fill="#250f24" stroke="#ff0055" stroke-width="10"/>
+                                <rect x="1308" y="780" width="440" height="36" fill="#250f24" stroke="#ff0055" stroke-width="10"/>
+                                <rect x="774" y="520" width="500" height="36" fill="#1b152b" stroke="#00ffcc" stroke-width="10"/>
+                                <!-- Spawns -->
+                                <circle cx="300" cy="880" r="40" fill="#ff0055"/>
+                                <circle cx="1748" cy="880" r="40" fill="#00e5ff"/>
+                            </svg>
                         </div>
                         <div class="map-name">CLASSIC ARENA</div>
-                        <div class="map-desc">Standard balanced triple elevated platforms.</div>
+                        <div class="map-desc">Balanced triple elevated platforms</div>
                     </div>
+
                     <div class="map-card" data-map="fancy">
-                        <div class="map-preview-container">
-                            <canvas class="map-silhouette-canvas" data-map="fancy" width="280" height="150"></canvas>
+                        <div class="map-preview-box">
+                            <svg class="map-silhouette-svg" viewBox="0 0 2048 1152">
+                                <rect x="0" y="0" width="2048" height="1152" fill="#060012"/>
+                                <rect x="0" y="0" width="2048" height="1152" fill="url(#neon-grad)" opacity="0.4"/>
+                                <defs>
+                                    <linearGradient id="neon-grad" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stop-color="#ff007f"/>
+                                        <stop offset="100%" stop-color="#00e5ff"/>
+                                    </linearGradient>
+                                </defs>
+                                <!-- Ground Platform -->
+                                <rect x="0" y="1060" width="2048" height="92" fill="#15002b" stroke="#ff007f" stroke-width="14"/>
+                                <!-- Elevated Platforms -->
+                                <rect x="200" y="760" width="450" height="36" fill="#15002b" stroke="#00e5ff" stroke-width="10"/>
+                                <rect x="1398" y="760" width="450" height="36" fill="#15002b" stroke="#00e5ff" stroke-width="10"/>
+                                <rect x="724" y="480" width="600" height="36" fill="#15002b" stroke="#ff007f" stroke-width="10"/>
+                                <!-- Spawns -->
+                                <circle cx="300" cy="880" r="40" fill="#ff0055"/>
+                                <circle cx="1748" cy="880" r="40" fill="#00e5ff"/>
+                            </svg>
                         </div>
                         <div class="map-name">FANCY NEON CITY</div>
-                        <div class="map-desc">Spectacular cyberpunk aurora background lights.</div>
-                    </div>
-                    <div class="map-card" data-map="lava">
-                        <div class="map-preview-container">
-                            <canvas class="map-silhouette-canvas" data-map="lava" width="280" height="150"></canvas>
-                        </div>
-                        <div class="map-name">LAVA VOLCANO</div>
-                        <div class="map-desc">Lava bottom hazard that bounces and burns.</div>
-                    </div>
-                    <div class="map-card" data-map="dojo">
-                        <div class="map-preview-container">
-                            <canvas class="map-silhouette-canvas" data-map="dojo" width="280" height="150"></canvas>
-                        </div>
-                        <div class="map-name">MARTIAL DOJO</div>
-                        <div class="map-desc">Traditional bamboo wooden duel platforms.</div>
-                    </div>
-                    <div class="map-card" data-map="space">
-                        <div class="map-preview-container">
-                            <canvas class="map-silhouette-canvas" data-map="space" width="280" height="150"></canvas>
-                        </div>
-                        <div class="map-name">DEEP SPACE</div>
-                        <div class="map-desc">Floating cosmic station with float gravity.</div>
+                        <div class="map-desc">Cyberpunk aurora background lights</div>
                     </div>
                 </div>
                 <button id="start-game-btn" class="main-btn">FIGHT!</button>
