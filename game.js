@@ -1,5 +1,5 @@
 // Bounce Attack - Tekken Style Stickman Edition
-// 1.5x Reduced Jump Force, 1.5x Expanded Arenas, 2 Selectable Maps, and Strict Hit-Only Ult Charge for Special Attacks
+// 0.65x Balanced Jump Force, Expanded Melee Attack Box Ranges (1.6x-1.8x), and Viewport-Fitted 2 Horizontal Map Layout
 
 const CANVAS_WIDTH = 2048;
 const CANVAS_HEIGHT = 1152;
@@ -52,22 +52,22 @@ function playBgm() {
 }
 
 // --- CHARACTER CONFIGURATIONS ---
-// 점프력 1.5배 낮게 보정 (2.142 / 1.5 = 1.428)
+// 점프력 0.65배 보정 (1.428 * 0.65 = 0.9282)
 const CHARACTER_PRESETS = {
-    swordsman: { name: 'SWORDSMAN', icon: 'SW', color: '#ff9500', maxHp: 120, speed: 6.5 * 0.84375, jumpForce: 15.5 * 1.428, basicDamage: 12, specialDamage: 22, ultDamage: 45, basicCd: 400, specialCd: 1200, ultCd: 4000 },
-    mage: { name: 'MAGE', icon: 'MG', color: '#ff2d55', maxHp: 90, speed: 5.0 * 0.84375, jumpForce: 15.0 * 1.428, basicDamage: 10, specialDamage: 26, ultDamage: 50, basicCd: 500, specialCd: 1400, ultCd: 4800 },
-    archer: { name: 'ARCHER', icon: 'AR', color: '#4cd964', maxHp: 95, speed: 6.0 * 0.84375, jumpForce: 16.0 * 1.428, basicDamage: 8, specialDamage: 18, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4200 },
-    rogue: { name: 'ROGUE', icon: 'RG', color: '#bf5af2', maxHp: 90, speed: 8.0 * 0.84375, jumpForce: 17.5 * 1.428, basicDamage: 11, specialDamage: 20, ultDamage: 38, basicCd: 300, specialCd: 1000, ultCd: 3500 },
-    lancer: { name: 'LANCER', icon: 'LC', color: '#5ac8fa', maxHp: 110, speed: 6.0 * 0.84375, jumpForce: 15.0 * 1.428, basicDamage: 13, specialDamage: 22, ultDamage: 42, basicCd: 500, specialCd: 1300, ultCd: 4000 },
-    berserker: { name: 'BERSERKER', icon: 'BS', color: '#ff3b30', maxHp: 140, speed: 5.5 * 0.84375, jumpForce: 14.5 * 1.428, basicDamage: 15, specialDamage: 28, ultDamage: 52, basicCd: 650, specialCd: 1600, ultCd: 4800 },
-    gunner: { name: 'GUNNER', icon: 'GN', color: '#ffcc00', maxHp: 85, speed: 5.5 * 0.84375, jumpForce: 14.0 * 1.428, basicDamage: 7, specialDamage: 17, ultDamage: 38, basicCd: 220, specialCd: 1000, ultCd: 3800 },
-    ninja: { name: 'NINJA', icon: 'NJ', color: '#00e5ff', maxHp: 90, speed: 7.5 * 0.84375, jumpForce: 16.5 * 1.428, basicDamage: 9, specialDamage: 19, ultDamage: 38, basicCd: 320, specialCd: 850, ultCd: 3600 },
-    brawler: { name: 'BRAWLER', icon: 'BR', color: '#e040fb', maxHp: 115, speed: 6.5 * 0.84375, jumpForce: 15.0 * 1.428, basicDamage: 12, specialDamage: 22, ultDamage: 42, basicCd: 380, specialCd: 1100, ultCd: 4000 },
-    necromancer: { name: 'NECROMANCER', icon: 'NC', color: '#8e8e93', maxHp: 95, speed: 4.8 * 0.84375, jumpForce: 14.5 * 1.428, basicDamage: 9, specialDamage: 22, ultDamage: 45, basicCd: 600, specialCd: 1500, ultCd: 4800 },
-    paladin: { name: 'PALADIN', icon: 'PL', color: '#0a84ff', maxHp: 150, speed: 4.5 * 0.84375, jumpForce: 14.0 * 1.428, basicDamage: 10, specialDamage: 18, ultDamage: 35, basicCd: 550, specialCd: 1800, ultCd: 4800 },
-    reaper: { name: 'REAPER', icon: 'RP', color: '#34c759', maxHp: 105, speed: 5.5 * 0.84375, jumpForce: 15.0 * 1.428, basicDamage: 14, specialDamage: 25, ultDamage: 45, basicCd: 550, specialCd: 1300, ultCd: 4200 },
-    vampire: { name: 'VAMPIRE', icon: 'VP', color: '#ff2d55', maxHp: 100, speed: 6.0 * 0.84375, jumpForce: 15.5 * 1.428, basicDamage: 10, specialDamage: 21, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4000 },
-    alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 1.428, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
+    swordsman: { name: 'SWORDSMAN', icon: 'SW', color: '#ff9500', maxHp: 120, speed: 6.5 * 0.84375, jumpForce: 15.5 * 0.9282, basicDamage: 12, specialDamage: 22, ultDamage: 45, basicCd: 400, specialCd: 1200, ultCd: 4000 },
+    mage: { name: 'MAGE', icon: 'MG', color: '#ff2d55', maxHp: 90, speed: 5.0 * 0.84375, jumpForce: 15.0 * 0.9282, basicDamage: 10, specialDamage: 26, ultDamage: 50, basicCd: 500, specialCd: 1400, ultCd: 4800 },
+    archer: { name: 'ARCHER', icon: 'AR', color: '#4cd964', maxHp: 95, speed: 6.0 * 0.84375, jumpForce: 16.0 * 0.9282, basicDamage: 8, specialDamage: 18, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4200 },
+    rogue: { name: 'ROGUE', icon: 'RG', color: '#bf5af2', maxHp: 90, speed: 8.0 * 0.84375, jumpForce: 17.5 * 0.9282, basicDamage: 11, specialDamage: 20, ultDamage: 38, basicCd: 300, specialCd: 1000, ultCd: 3500 },
+    lancer: { name: 'LANCER', icon: 'LC', color: '#5ac8fa', maxHp: 110, speed: 6.0 * 0.84375, jumpForce: 15.0 * 0.9282, basicDamage: 13, specialDamage: 22, ultDamage: 42, basicCd: 500, specialCd: 1300, ultCd: 4000 },
+    berserker: { name: 'BERSERKER', icon: 'BS', color: '#ff3b30', maxHp: 140, speed: 5.5 * 0.84375, jumpForce: 14.5 * 0.9282, basicDamage: 15, specialDamage: 28, ultDamage: 52, basicCd: 650, specialCd: 1600, ultCd: 4800 },
+    gunner: { name: 'GUNNER', icon: 'GN', color: '#ffcc00', maxHp: 85, speed: 5.5 * 0.84375, jumpForce: 14.0 * 0.9282, basicDamage: 7, specialDamage: 17, ultDamage: 38, basicCd: 220, specialCd: 1000, ultCd: 3800 },
+    ninja: { name: 'NINJA', icon: 'NJ', color: '#00e5ff', maxHp: 90, speed: 7.5 * 0.84375, jumpForce: 16.5 * 0.9282, basicDamage: 9, specialDamage: 19, ultDamage: 38, basicCd: 320, specialCd: 850, ultCd: 3600 },
+    brawler: { name: 'BRAWLER', icon: 'BR', color: '#e040fb', maxHp: 115, speed: 6.5 * 0.84375, jumpForce: 15.0 * 0.9282, basicDamage: 12, specialDamage: 22, ultDamage: 42, basicCd: 380, specialCd: 1100, ultCd: 4000 },
+    necromancer: { name: 'NECROMANCER', icon: 'NC', color: '#8e8e93', maxHp: 95, speed: 4.8 * 0.84375, jumpForce: 14.5 * 0.9282, basicDamage: 9, specialDamage: 22, ultDamage: 45, basicCd: 600, specialCd: 1500, ultCd: 4800 },
+    paladin: { name: 'PALADIN', icon: 'PL', color: '#0a84ff', maxHp: 150, speed: 4.5 * 0.84375, jumpForce: 14.0 * 0.9282, basicDamage: 10, specialDamage: 18, ultDamage: 35, basicCd: 550, specialCd: 1800, ultCd: 4800 },
+    reaper: { name: 'REAPER', icon: 'RP', color: '#34c759', maxHp: 105, speed: 5.5 * 0.84375, jumpForce: 15.0 * 0.9282, basicDamage: 14, specialDamage: 25, ultDamage: 45, basicCd: 550, specialCd: 1300, ultCd: 4200 },
+    vampire: { name: 'VAMPIRE', icon: 'VP', color: '#ff2d55', maxHp: 100, speed: 6.0 * 0.84375, jumpForce: 15.5 * 0.9282, basicDamage: 10, specialDamage: 21, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4000 },
+    alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 0.9282, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
 };
 
 // --- 2 REFINED EXPANDED MAPS ---
@@ -375,7 +375,6 @@ class Player {
                 this.vy = -this.config.jumpForce;
                 this.angularVelocity = this.facing * 0.35;
             } else {
-                // Controlled Balanced Double Jump (1.5x Reduced)
                 this.vy = -this.config.jumpForce * 0.95;
                 this.angularVelocity = -this.facing * 0.65;
                 createHitParticles(this.x + this.width/2, this.y + this.height, '#ffffff', 14);
@@ -415,7 +414,6 @@ class Player {
         this.comboCount++;
         this.comboResetTimer = 120;
         
-        // STRICT HIT-ONLY ULT CHARGE: Basic: +12%, Special: +30%
         if (skillType === 'special') {
             this.gainUlt(30);
         } else {
@@ -431,6 +429,7 @@ class Player {
         this.ultGauge = Math.min(100, this.ultGauge + amount);
     }
 
+    // EXPANDED MELEE ATTACK BOX RANGES (1.6x-1.8x Reach Boost)
     useBasicAttack(opponent) {
         const now = Date.now();
         let cd = this.config.basicCd;
@@ -443,10 +442,10 @@ class Player {
         this.attackTimer = 14;
         
         if (this.charKey === 'swordsman' || this.charKey === 'berserker' || this.charKey === 'brawler') {
-            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 85, y: this.y + 10, w: 85, h: this.height - 20 };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 155, y: this.y - 10, w: 155, h: this.height + 20 };
             if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, 'basic');
         } else if (this.charKey === 'lancer') {
-            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 130, y: this.y + 25, w: 130, h: 28 };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 210, y: this.y + 10, w: 210, h: 48 };
             if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, 'basic');
         } else if (this.charKey === 'mage') {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
@@ -464,13 +463,13 @@ class Player {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
             projectiles.push(new Projectile(pX, this.y + 28, this.facing, 0, '#bf5af2', 9, 9, this.config.basicDamage, this.id, 'basic'));
         } else if (this.charKey === 'paladin') {
-            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 60, y: this.y + 6, w: 60, h: this.height - 12 };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 140, y: this.y - 10, w: 140, h: this.height + 20 };
             if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, 'basic');
         } else if (this.charKey === 'reaper') {
-            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 100, y: this.y, w: 100, h: this.height };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 180, y: this.y - 15, w: 180, h: this.height + 30 };
             if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, 'basic');
         } else if (this.charKey === 'vampire') {
-            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 75, y: this.y + 12, w: 75, h: this.height - 24 };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 150, y: this.y, w: 150, h: this.height + 10 };
             if (checkMeleeHit(this, opponent, this.config.basicDamage)) {
                 this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.basicDamage * 0.35));
                 this.registerHitOnOpponent(opponent, 'basic');
@@ -479,7 +478,7 @@ class Player {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
             projectiles.push(new Projectile(pX, this.y + 20, this.facing, -0.15, '#30d158', 8, 11, this.config.basicDamage, this.id, 'basic'));
         } else if (this.charKey === 'rogue') {
-            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 65, y: this.y + 18, w: 65, h: this.height - 36 };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 135, y: this.y, w: 135, h: this.height + 10 };
             if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, 'basic');
         }
         
@@ -496,7 +495,7 @@ class Player {
             this.angularVelocity = this.facing * 0.4;
             this.isAttacking = true;
             this.attackTimer = 18;
-            this.attackBox = { x: this.x - 25, y: this.y, w: this.width + 50, h: this.height };
+            this.attackBox = { x: this.x - 45, y: this.y - 15, w: this.width + 90, h: this.height + 30 };
             if (checkMeleeHit(this, opponent, this.config.specialDamage)) this.registerHitOnOpponent(opponent, 'special');
         } 
         else if (this.charKey === 'mage') {
@@ -545,7 +544,7 @@ class Player {
             this.registerHitOnOpponent(opponent, 'special');
         } 
         else if (this.charKey === 'brawler') {
-            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 60, y: this.y - 35, w: 75, h: this.height + 35 };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 120, y: this.y - 40, w: 140, h: this.height + 40 };
             if (checkMeleeHit(this, opponent, this.config.specialDamage)) {
                 opponent.vy = -18;
                 opponent.vx = this.facing * 6;
@@ -568,7 +567,7 @@ class Player {
         else if (this.charKey === 'vampire') {
             this.vx = this.facing * 24;
             createHitParticles(this.x + this.width/2, this.y + this.height/2, '#ff2d55', 30);
-            if (Math.abs(this.x - opponent.x) < 140 && Math.abs(this.y - opponent.y) < 90) {
+            if (Math.abs(this.x - opponent.x) < 180 && Math.abs(this.y - opponent.y) < 110) {
                 opponent.takeDamage(this.config.specialDamage);
                 this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.specialDamage * 0.55));
                 this.registerHitOnOpponent(opponent, 'special');
@@ -1147,7 +1146,6 @@ function gameLoop() {
                 if (distToTarget < targetPlayer.height/2 + p.size) {
                     targetPlayer.takeDamage(p.damage);
                     
-                    // STRICT HIT-ONLY ULT CHARGE ON PROJECTILE HIT!
                     attackerPlayer.registerHitOnOpponent(targetPlayer, p.skillCategory || 'basic');
                     collided = true;
                     
