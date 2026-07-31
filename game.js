@@ -1,5 +1,5 @@
 // Bounce Attack - Tekken Style Stickman Edition
-// Strictly Forced 3-Column Horizontal Layout with Clear Active Map Selection Buttons
+// Smooth Screen Transition, Expanded Ceiling Headroom, and Hit-Only Ult Charge (Basic: +12%, Special: +30%)
 
 const CANVAS_WIDTH = 2048;
 const CANVAS_HEIGHT = 1152;
@@ -26,7 +26,7 @@ let screenShake = 0;
 let hitStopTimer = 0;
 let gameTimer = 99;
 let timerInterval = null;
-let selectedMapKey = 'flat'; // Default active map
+let selectedMapKey = 'flat';
 
 // --- SOUND CONTROL ---
 const bgm = document.getElementById('bgm');
@@ -53,7 +53,6 @@ function playBgm() {
 }
 
 // --- CHARACTER CONFIGURATIONS ---
-// High Powered Jump Force Scale (2.142075)
 const CHARACTER_PRESETS = {
     swordsman: { name: 'SWORDSMAN', icon: 'SW', color: '#ff9500', maxHp: 120, speed: 6.5 * 0.84375, jumpForce: 15.5 * 2.142, basicDamage: 12, specialDamage: 22, ultDamage: 45, basicCd: 400, specialCd: 1200, ultCd: 4000 },
     mage: { name: 'MAGE', icon: 'MG', color: '#ff2d55', maxHp: 90, speed: 5.0 * 0.84375, jumpForce: 15.0 * 2.142, basicDamage: 10, specialDamage: 26, ultDamage: 50, basicCd: 500, specialCd: 1400, ultCd: 4800 },
@@ -71,7 +70,7 @@ const CHARACTER_PRESETS = {
     alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 2.142, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
 };
 
-// --- 3 REFINED HORIZONTAL MAPS ---
+// --- 3 REFINED MAPS WITH EXPANDED CEILING HEADROOM ---
 const MAPS = {
     flat: {
         name: 'FLAT ARENA',
@@ -80,10 +79,10 @@ const MAPS = {
         gravity: 0.676,
         isFancy: false,
         platforms: [
-            { x: 0, y: 1060, w: 2048, h: 92, border: '#00e5ff', fill: '#0f172a' }
+            { x: 0, y: 1090, w: 2048, h: 62, border: '#00e5ff', fill: '#0f172a' }
         ],
-        spawnP1: { x: 300, y: 880 },
-        spawnP2: { x: 1748, y: 880 }
+        spawnP1: { x: 300, y: 910 },
+        spawnP2: { x: 1748, y: 910 }
     },
     classic: {
         name: 'CLASSIC ARENA',
@@ -92,13 +91,13 @@ const MAPS = {
         gravity: 0.676,
         isFancy: false,
         platforms: [
-            { x: 0, y: 1060, w: 2048, h: 92, border: '#ffaa00', fill: '#1b152b' },
-            { x: 300, y: 780, w: 440, h: 36, border: '#ff0055', fill: '#250f24' },
-            { x: 1308, y: 780, w: 440, h: 36, border: '#ff0055', fill: '#250f24' },
-            { x: 774, y: 520, w: 500, h: 36, border: '#00ffcc', fill: '#1b152b' }
+            { x: 0, y: 1090, w: 2048, h: 62, border: '#ffaa00', fill: '#1b152b' },
+            { x: 300, y: 850, w: 440, h: 36, border: '#ff0055', fill: '#250f24' },
+            { x: 1308, y: 850, w: 440, h: 36, border: '#ff0055', fill: '#250f24' },
+            { x: 774, y: 620, w: 500, h: 36, border: '#00ffcc', fill: '#1b152b' }
         ],
-        spawnP1: { x: 300, y: 880 },
-        spawnP2: { x: 1748, y: 880 }
+        spawnP1: { x: 300, y: 910 },
+        spawnP2: { x: 1748, y: 910 }
     },
     fancy: {
         name: 'FANCY NEON CITY',
@@ -107,13 +106,13 @@ const MAPS = {
         gravity: 0.676,
         isFancy: true,
         platforms: [
-            { x: 0, y: 1060, w: 2048, h: 92, border: '#ff007f', fill: '#15002b' },
-            { x: 200, y: 760, w: 450, h: 36, border: '#00e5ff', fill: '#15002b' },
-            { x: 1398, y: 760, w: 450, h: 36, border: '#00e5ff', fill: '#15002b' },
-            { x: 724, y: 480, w: 600, h: 36, border: '#ff007f', fill: '#15002b' }
+            { x: 0, y: 1090, w: 2048, h: 62, border: '#ff007f', fill: '#15002b' },
+            { x: 200, y: 840, w: 450, h: 36, border: '#00e5ff', fill: '#15002b' },
+            { x: 1398, y: 840, w: 450, h: 36, border: '#00e5ff', fill: '#15002b' },
+            { x: 724, y: 600, w: 600, h: 36, border: '#ff007f', fill: '#15002b' }
         ],
-        spawnP1: { x: 300, y: 880 },
-        spawnP2: { x: 1748, y: 880 }
+        spawnP1: { x: 300, y: 910 },
+        spawnP2: { x: 1748, y: 910 }
     }
 };
 
@@ -215,7 +214,7 @@ class Particle {
 }
 
 class Projectile {
-    constructor(x, y, dx, dy, color, size, speed, damage, owner, type = 'normal', trackingTarget = null) {
+    constructor(x, y, dx, dy, color, size, speed, damage, owner, skillCategory = 'basic', type = 'normal', trackingTarget = null) {
         this.x = x;
         this.y = y;
         this.dx = dx;
@@ -225,6 +224,7 @@ class Projectile {
         this.speed = speed * 1.3;
         this.damage = damage;
         this.owner = owner; 
+        this.skillCategory = skillCategory; // 'basic' or 'special'
         this.type = type; 
         this.target = trackingTarget;
         this.life = 180; 
@@ -392,7 +392,6 @@ class Player {
                 this.vy = -this.config.jumpForce;
                 this.angularVelocity = this.facing * 0.35;
             } else {
-                // High Powered Double Jump
                 this.vy = -this.config.jumpForce * 0.95;
                 this.angularVelocity = -this.facing * 0.65;
                 createHitParticles(this.x + this.width/2, this.y + this.height, '#ffffff', 14);
@@ -416,7 +415,6 @@ class Player {
         let dmgTaken = Math.round(dmg * (this.charKey === 'berserker' ? 1.25 : 1.0));
         this.hp = Math.max(0, this.hp - dmgTaken);
         
-        this.gainUlt(dmgTaken * 0.6);
         screenShake = 22;
         hitStopTimer = 3;
         
@@ -429,9 +427,16 @@ class Player {
         createHitParticles(this.x + this.width/2, this.y + this.height/2, this.config.color, 24);
     }
 
-    registerHitOnOpponent(opponent, dmg) {
+    registerHitOnOpponent(opponent, skillType = 'basic') {
         this.comboCount++;
         this.comboResetTimer = 120;
+        
+        // HIT-ONLY ULT CHARGE RATIOS (Basic: +12%, Special: +30%)
+        if (skillType === 'special') {
+            this.gainUlt(30);
+        } else {
+            this.gainUlt(12);
+        }
         
         if (this.comboCount >= 2) {
             comboTexts.push(new ComboText(opponent.x + opponent.width/2, opponent.y - 30, `${this.comboCount} HITS!`, this.config.color));
@@ -455,43 +460,43 @@ class Player {
         
         if (this.charKey === 'swordsman' || this.charKey === 'berserker' || this.charKey === 'brawler') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 85, y: this.y + 10, w: 85, h: this.height - 20 };
-            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, this.config.basicDamage);
+            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, 'basic');
         } else if (this.charKey === 'lancer') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 130, y: this.y + 25, w: 130, h: 28 };
-            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, this.config.basicDamage);
+            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, 'basic');
         } else if (this.charKey === 'mage') {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
-            projectiles.push(new Projectile(pX, this.y + 30, this.facing, 0, '#ff5500', 10, 11, this.config.basicDamage, this.id));
+            projectiles.push(new Projectile(pX, this.y + 30, this.facing, 0, '#ff5500', 10, 11, this.config.basicDamage, this.id, 'basic'));
         } else if (this.charKey === 'archer') {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
-            projectiles.push(new Projectile(pX, this.y + 30, this.facing, 0, '#4cd964', 5, 18, this.config.basicDamage, this.id));
+            projectiles.push(new Projectile(pX, this.y + 30, this.facing, 0, '#4cd964', 5, 18, this.config.basicDamage, this.id, 'basic'));
         } else if (this.charKey === 'gunner') {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
-            projectiles.push(new Projectile(pX, this.y + 28, this.facing, 0, '#ffcc00', 6, 22, this.config.basicDamage, this.id));
+            projectiles.push(new Projectile(pX, this.y + 28, this.facing, 0, '#ffcc00', 6, 22, this.config.basicDamage, this.id, 'basic'));
         } else if (this.charKey === 'ninja') {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
-            projectiles.push(new Projectile(pX, this.y + 28, this.facing, 0, '#8e8e93', 8, 16, this.config.basicDamage, this.id));
+            projectiles.push(new Projectile(pX, this.y + 28, this.facing, 0, '#8e8e93', 8, 16, this.config.basicDamage, this.id, 'basic'));
         } else if (this.charKey === 'necromancer') {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
-            projectiles.push(new Projectile(pX, this.y + 28, this.facing, 0, '#bf5af2', 9, 9, this.config.basicDamage, this.id));
+            projectiles.push(new Projectile(pX, this.y + 28, this.facing, 0, '#bf5af2', 9, 9, this.config.basicDamage, this.id, 'basic'));
         } else if (this.charKey === 'paladin') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 60, y: this.y + 6, w: 60, h: this.height - 12 };
-            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, this.config.basicDamage);
+            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, 'basic');
         } else if (this.charKey === 'reaper') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 100, y: this.y, w: 100, h: this.height };
-            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, this.config.basicDamage);
+            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, 'basic');
         } else if (this.charKey === 'vampire') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 75, y: this.y + 12, w: 75, h: this.height - 24 };
             if (checkMeleeHit(this, opponent, this.config.basicDamage)) {
                 this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.basicDamage * 0.35));
-                this.registerHitOnOpponent(opponent, this.config.basicDamage);
+                this.registerHitOnOpponent(opponent, 'basic');
             }
         } else if (this.charKey === 'alchemist') {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
-            projectiles.push(new Projectile(pX, this.y + 20, this.facing, -0.15, '#30d158', 8, 11, this.config.basicDamage, this.id));
+            projectiles.push(new Projectile(pX, this.y + 20, this.facing, -0.15, '#30d158', 8, 11, this.config.basicDamage, this.id, 'basic'));
         } else if (this.charKey === 'rogue') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 65, y: this.y + 18, w: 65, h: this.height - 36 };
-            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, this.config.basicDamage);
+            if (checkMeleeHit(this, opponent, this.config.basicDamage)) this.registerHitOnOpponent(opponent, 'basic');
         }
         
         triggerCooldownUI(this.id, 'basic', cd);
@@ -508,7 +513,7 @@ class Player {
             this.isAttacking = true;
             this.attackTimer = 18;
             this.attackBox = { x: this.x - 25, y: this.y, w: this.width + 50, h: this.height };
-            if (checkMeleeHit(this, opponent, this.config.specialDamage)) this.registerHitOnOpponent(opponent, this.config.specialDamage);
+            if (checkMeleeHit(this, opponent, this.config.specialDamage)) this.registerHitOnOpponent(opponent, 'special');
         } 
         else if (this.charKey === 'mage') {
             createExplosion(this.x + this.width/2, this.y + this.height/2, 180, '#ff9500');
@@ -516,14 +521,14 @@ class Player {
             if (dist < 200) {
                 opponent.takeDamage(this.config.specialDamage);
                 opponent.vx = (opponent.x > this.x ? 1 : -1) * 14;
-                this.registerHitOnOpponent(opponent, this.config.specialDamage);
+                this.registerHitOnOpponent(opponent, 'special');
             }
         } 
         else if (this.charKey === 'archer') {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
-            projectiles.push(new Projectile(pX, this.y + 30, this.facing, -0.22, '#4cd964', 5, 14, this.config.specialDamage * 0.5, this.id));
-            projectiles.push(new Projectile(pX, this.y + 30, this.facing, 0, '#4cd964', 5, 14, this.config.specialDamage * 0.5, this.id));
-            projectiles.push(new Projectile(pX, this.y + 30, this.facing, 0.22, '#4cd964', 5, 14, this.config.specialDamage * 0.5, this.id));
+            projectiles.push(new Projectile(pX, this.y + 30, this.facing, -0.22, '#4cd964', 5, 14, this.config.specialDamage * 0.5, this.id, 'special'));
+            projectiles.push(new Projectile(pX, this.y + 30, this.facing, 0, '#4cd964', 5, 14, this.config.specialDamage * 0.5, this.id, 'special'));
+            projectiles.push(new Projectile(pX, this.y + 30, this.facing, 0.22, '#4cd964', 5, 14, this.config.specialDamage * 0.5, this.id, 'special'));
         } 
         else if (this.charKey === 'rogue') {
             this.isInvisible = true;
@@ -543,7 +548,7 @@ class Player {
         } 
         else if (this.charKey === 'gunner') {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
-            projectiles.push(new Projectile(pX, this.y + 15, this.facing, -0.25, '#ffcc00', 14, 12, this.config.specialDamage, this.id, 'bomb'));
+            projectiles.push(new Projectile(pX, this.y + 15, this.facing, -0.25, '#ffcc00', 14, 12, this.config.specialDamage, this.id, 'special', 'bomb'));
         } 
         else if (this.charKey === 'ninja') {
             let oldX = this.x;
@@ -553,19 +558,19 @@ class Player {
             createHitParticles(oldX + this.width/2, this.y + this.height/2, '#8e8e93', 20);
             createHitParticles(this.x + this.width/2, this.y + this.height/2, '#ff2d55', 20);
             opponent.takeDamage(this.config.specialDamage);
-            this.registerHitOnOpponent(opponent, this.config.specialDamage);
+            this.registerHitOnOpponent(opponent, 'special');
         } 
         else if (this.charKey === 'brawler') {
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 60, y: this.y - 35, w: 75, h: this.height + 35 };
             if (checkMeleeHit(this, opponent, this.config.specialDamage)) {
                 opponent.vy = -18;
                 opponent.vx = this.facing * 6;
-                this.registerHitOnOpponent(opponent, this.config.specialDamage);
+                this.registerHitOnOpponent(opponent, 'special');
             }
         } 
         else if (this.charKey === 'necromancer') {
             let pX = this.facing === 1 ? this.x + this.width : this.x - 20;
-            projectiles.push(new Projectile(pX, this.y + 15, this.facing, 0, '#bf5af2', 12, 8, this.config.specialDamage, this.id, 'homing', opponent));
+            projectiles.push(new Projectile(pX, this.y + 15, this.facing, 0, '#bf5af2', 12, 8, this.config.specialDamage, this.id, 'special', 'homing', opponent));
         } 
         else if (this.charKey === 'paladin') {
             this.isShielded = true;
@@ -574,7 +579,7 @@ class Player {
         } 
         else if (this.charKey === 'reaper') {
             let pX = this.facing === 1 ? this.x + this.width : this.x - 20;
-            projectiles.push(new Projectile(pX, this.y + 30, this.facing, 0, '#34c759', 16, 9, this.config.specialDamage, this.id, 'absorb', opponent));
+            projectiles.push(new Projectile(pX, this.y + 30, this.facing, 0, '#34c759', 16, 9, this.config.specialDamage, this.id, 'special', 'absorb', opponent));
         } 
         else if (this.charKey === 'vampire') {
             this.vx = this.facing * 24;
@@ -582,15 +587,14 @@ class Player {
             if (Math.abs(this.x - opponent.x) < 140 && Math.abs(this.y - opponent.y) < 90) {
                 opponent.takeDamage(this.config.specialDamage);
                 this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.specialDamage * 0.55));
-                this.registerHitOnOpponent(opponent, this.config.specialDamage);
+                this.registerHitOnOpponent(opponent, 'special');
             }
         } 
         else if (this.charKey === 'alchemist') {
             let pX = this.facing === 1 ? this.x + this.width : this.x - 20;
-            projectiles.push(new Projectile(pX, this.y, this.facing, -0.35, '#30d158', 12, 11, this.config.specialDamage, this.id, 'bomb'));
+            projectiles.push(new Projectile(pX, this.y, this.facing, -0.35, '#30d158', 12, 11, this.config.specialDamage, this.id, 'special', 'bomb'));
         }
 
-        this.gainUlt(16);
         triggerCooldownUI(this.id, 'special', this.config.specialCd);
     }
 
@@ -607,20 +611,19 @@ class Player {
                     this.y = opponent.y - 20;
                     this.angularVelocity = (Math.random() - 0.5) * 0.8;
                     opponent.takeDamage(this.config.ultDamage / 7);
-                    this.registerHitOnOpponent(opponent, this.config.ultDamage / 7);
                     createHitParticles(opponent.x + opponent.width/2, opponent.y + opponent.height/2, '#ff2d55', 20);
                 }, i * 140);
             }
         } 
         else if (this.charKey === 'mage') {
             let pX = opponent.x;
-            projectiles.push(new Projectile(pX, 0, 0, 1, '#ff3b30', 48, 9, this.config.ultDamage, this.id, 'bomb'));
+            projectiles.push(new Projectile(pX, 0, 0, 1, '#ff3b30', 48, 9, this.config.ultDamage, this.id, 'ult', 'bomb'));
         } 
         else if (this.charKey === 'archer') {
             for(let i=0; i<10; i++) {
                 setTimeout(() => {
                     let pX = this.facing === 1 ? this.x + this.width : this.x - 20;
-                    projectiles.push(new Projectile(pX, this.y + 15 + (Math.random()-0.5)*60, this.facing, (Math.random()-0.5)*0.25, '#4cd964', 6, 24, this.config.ultDamage / 10, this.id));
+                    projectiles.push(new Projectile(pX, this.y + 15 + (Math.random()-0.5)*60, this.facing, (Math.random()-0.5)*0.25, '#4cd964', 6, 24, this.config.ultDamage / 10, this.id, 'ult'));
                 }, i * 70);
             }
         } 
@@ -631,7 +634,6 @@ class Player {
                 let dist = Math.hypot(this.x - opponent.x, this.y - opponent.y);
                 if (dist < 260) {
                     opponent.takeDamage(this.config.ultDamage);
-                    this.registerHitOnOpponent(opponent, this.config.ultDamage);
                     createHitParticles(opponent.x + opponent.width/2, opponent.y + opponent.height/2, '#af52de', 45);
                 }
             }, 90);
@@ -648,7 +650,6 @@ class Player {
                         let dist = Math.hypot((this.x + this.width/2) - (opponent.x + opponent.width/2), (this.y + this.height) - (opponent.y + opponent.height));
                         if (dist < 260) {
                             opponent.takeDamage(this.config.ultDamage);
-                            this.registerHitOnOpponent(opponent, this.config.ultDamage);
                             opponent.vy = -18;
                         }
                     }
@@ -660,7 +661,6 @@ class Player {
             let dist = Math.hypot(this.x - opponent.x, this.y - opponent.y);
             if (dist < 300) {
                 opponent.takeDamage(this.config.ultDamage);
-                this.registerHitOnOpponent(opponent, this.config.ultDamage);
                 opponent.vx = (opponent.x > this.x ? 1 : -1) * 26;
                 opponent.vy = -10;
             }
@@ -690,7 +690,6 @@ class Player {
             if (opponent.y + opponent.height > this.y + 5 && opponent.y < this.y + 55) {
                 if ((this.facing === 1 && opponent.x > this.x) || (this.facing === -1 && opponent.x < this.x)) {
                     opponent.takeDamage(this.config.ultDamage);
-                    this.registerHitOnOpponent(opponent, this.config.ultDamage);
                     opponent.vx = this.facing * 18;
                 }
             }
@@ -700,7 +699,7 @@ class Player {
                 setTimeout(() => {
                     let rx = Math.random() * CANVAS_WIDTH;
                     let angle = Math.atan2(opponent.y - 80, rx - opponent.x);
-                    projectiles.push(new Projectile(rx, 80, -Math.cos(angle), -Math.sin(angle), '#8e8e93', 9, 20, this.config.ultDamage / 15, this.id));
+                    projectiles.push(new Projectile(rx, 80, -Math.cos(angle), -Math.sin(angle), '#8e8e93', 9, 20, this.config.ultDamage / 15, this.id, 'ult'));
                 }, i * 70);
             }
         } 
@@ -709,21 +708,20 @@ class Player {
                 setTimeout(() => {
                     this.vx = this.facing * 10;
                     this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 90, y: this.y, w: 90, h: this.height };
-                    if (checkMeleeHit(this, opponent, this.config.ultDamage / 6)) this.registerHitOnOpponent(opponent, this.config.ultDamage / 6);
+                    if (checkMeleeHit(this, opponent, this.config.ultDamage / 6)) {};
                 }, i * 100);
             }
         } 
         else if (this.charKey === 'necromancer') {
             for(let i = 0; i < 4; i++) {
                 setTimeout(() => {
-                    projectiles.push(new Projectile(this.x + this.width/2, this.y, this.facing, -0.6 + (i*0.4), '#bf5af2', 18, 9, this.config.ultDamage/4, this.id, 'homing', opponent));
+                    projectiles.push(new Projectile(this.x + this.width/2, this.y, this.facing, -0.6 + (i*0.4), '#bf5af2', 18, 9, this.config.ultDamage/4, this.id, 'ult', 'homing', opponent));
                 }, i * 160);
             }
         } 
         else if (this.charKey === 'paladin') {
             createExplosion(opponent.x + opponent.width/2, opponent.y + opponent.height/2, 160, '#0a84ff');
             opponent.takeDamage(this.config.ultDamage);
-            this.registerHitOnOpponent(opponent, this.config.ultDamage);
             opponent.vy = 18;
         } 
         else if (this.charKey === 'reaper') {
@@ -733,7 +731,7 @@ class Player {
                 createHitParticles(opponent.x + opponent.width/2, opponent.y + opponent.height/2, '#ff0055', 50);
             }
             this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 130, y: this.y - 20, w: 130, h: this.height + 40 };
-            if (checkMeleeHit(this, opponent, baseDmg)) this.registerHitOnOpponent(opponent, baseDmg);
+            checkMeleeHit(this, opponent, baseDmg);
         } 
         else if (this.charKey === 'vampire') {
             createExplosion(this.x + this.width/2, this.y + this.height/2, 260, '#ff2d55');
@@ -741,12 +739,11 @@ class Player {
             if (dist < 280) {
                 opponent.takeDamage(this.config.ultDamage);
                 this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.ultDamage * 0.75));
-                this.registerHitOnOpponent(opponent, this.config.ultDamage);
             }
         } 
         else if (this.charKey === 'alchemist') {
             let pX = this.facing === 1 ? this.x + this.width : this.x - 20;
-            projectiles.push(new Projectile(pX, this.y + 15, this.facing, -0.18, '#30d158', 26, 11, this.config.ultDamage, this.id, 'bomb'));
+            projectiles.push(new Projectile(pX, this.y + 15, this.facing, -0.18, '#30d158', 26, 11, this.config.ultDamage, this.id, 'ult', 'bomb'));
         }
 
         triggerCooldownUI(this.id, 'ult', this.config.ultCd);
@@ -1178,7 +1175,9 @@ function gameLoop() {
                 
                 if (distToTarget < targetPlayer.height/2 + p.size) {
                     targetPlayer.takeDamage(p.damage);
-                    attackerPlayer.registerHitOnOpponent(targetPlayer, p.damage);
+                    
+                    // HIT-ONLY ULT CHARGE ON PROJECTILE HIT!
+                    attackerPlayer.registerHitOnOpponent(targetPlayer, p.skillCategory || 'basic');
                     collided = true;
                     
                     if (p.type === 'bomb') {
@@ -1382,7 +1381,7 @@ function setupGridSelect(gridId) {
 setupGridSelect('p1-char-grid');
 setupGridSelect('p2-char-grid');
 
-// 3 HORIZONTAL MAP SELECTION EVENT LISTENER (With SELECT button sync)
+// SMOOTH 3-COLUMN MAP SELECTION LISTENER
 const mapRow = document.querySelector('.map-horizontal-row');
 if (mapRow) {
     mapRow.addEventListener('click', e => {
