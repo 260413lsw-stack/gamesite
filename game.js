@@ -1,4 +1,4 @@
-// Bounce Attack - Premium Edition
+// Bounce Attack - Stickman Edition
 // Game Logic and Engine
 
 const CANVAS_WIDTH = 1024;
@@ -46,28 +46,13 @@ function playBgm() {
     }
 }
 
-// Helper: Rounded Rectangle Drawing
-function drawRoundedRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-    ctx.closePath();
-}
-
 // --- CHARACTER CONFIGURATIONS ---
-// 이동속도 1.5배 상향(0.75 * 1.5 = 1.125), 점프속도 1.3배 빠른 이행(0.75 * 1.3 = 0.975), 점프높이 동일 보존 (Gravity 0.676)
+// 스틱맨 대전에 최적화된 고대비 핫 칼라셋
 const CHARACTER_PRESETS = {
     swordsman: {
         name: 'SWORDSMAN',
         icon: 'SW',
-        color: '#ff2d55',
+        color: '#ff9500', // Bright Orange
         maxHp: 120,
         speed: 6.5 * 1.125,
         jumpForce: 15.5 * 0.975,
@@ -81,7 +66,7 @@ const CHARACTER_PRESETS = {
     mage: {
         name: 'MAGE',
         icon: 'MG',
-        color: '#ff9500',
+        color: '#ff2d55', // Neon Pink / Red
         maxHp: 90,
         speed: 5.0 * 1.125,
         jumpForce: 15.0 * 0.975,
@@ -95,7 +80,7 @@ const CHARACTER_PRESETS = {
     archer: {
         name: 'ARCHER',
         icon: 'AR',
-        color: '#4cd964',
+        color: '#4cd964', // Neon Green
         maxHp: 95,
         speed: 6.0 * 1.125,
         jumpForce: 16.0 * 0.975,
@@ -109,7 +94,7 @@ const CHARACTER_PRESETS = {
     rogue: {
         name: 'ROGUE',
         icon: 'RG',
-        color: '#af52de',
+        color: '#bf5af2', // Electric Purple
         maxHp: 90,
         speed: 8.0 * 1.125,
         jumpForce: 17.5 * 0.975,
@@ -123,7 +108,7 @@ const CHARACTER_PRESETS = {
     lancer: {
         name: 'LANCER',
         icon: 'LC',
-        color: '#5ac8fa',
+        color: '#5ac8fa', // Sky Blue
         maxHp: 110,
         speed: 6.0 * 1.125,
         jumpForce: 15.0 * 0.975,
@@ -137,7 +122,7 @@ const CHARACTER_PRESETS = {
     berserker: {
         name: 'BERSERKER',
         icon: 'BS',
-        color: '#ff3b30',
+        color: '#ff3b30', // Crimson
         maxHp: 140,
         speed: 5.5 * 1.125,
         jumpForce: 14.5 * 0.975,
@@ -151,7 +136,7 @@ const CHARACTER_PRESETS = {
     gunner: {
         name: 'GUNNER',
         icon: 'GN',
-        color: '#ffcc00',
+        color: '#ffcc00', // Yellow
         maxHp: 85,
         speed: 5.5 * 1.125,
         jumpForce: 14.0 * 0.975,
@@ -165,7 +150,7 @@ const CHARACTER_PRESETS = {
     ninja: {
         name: 'NINJA',
         icon: 'NJ',
-        color: '#8e8e93',
+        color: '#00e5ff', // Cyan
         maxHp: 90,
         speed: 7.5 * 1.125,
         jumpForce: 16.5 * 0.975,
@@ -179,7 +164,7 @@ const CHARACTER_PRESETS = {
     brawler: {
         name: 'BRAWLER',
         icon: 'BR',
-        color: '#e040fb',
+        color: '#e040fb', // Hot Pink
         maxHp: 115,
         speed: 6.5 * 1.125,
         jumpForce: 15.0 * 0.975,
@@ -193,7 +178,7 @@ const CHARACTER_PRESETS = {
     necromancer: {
         name: 'NECROMANCER',
         icon: 'NC',
-        color: '#bf5af2',
+        color: '#8e8e93', // Dark Slate
         maxHp: 95,
         speed: 4.8 * 1.125,
         jumpForce: 14.5 * 0.975,
@@ -207,7 +192,7 @@ const CHARACTER_PRESETS = {
     paladin: {
         name: 'PALADIN',
         icon: 'PL',
-        color: '#0a84ff',
+        color: '#0a84ff', // Deep Blue
         maxHp: 150,
         speed: 4.5 * 1.125,
         jumpForce: 14.0 * 0.975,
@@ -221,7 +206,7 @@ const CHARACTER_PRESETS = {
     reaper: {
         name: 'REAPER',
         icon: 'RP',
-        color: '#3a3a4c',
+        color: '#34c759', // Lime Green
         maxHp: 105,
         speed: 5.5 * 1.125,
         jumpForce: 15.0 * 0.975,
@@ -235,7 +220,7 @@ const CHARACTER_PRESETS = {
     vampire: {
         name: 'VAMPIRE',
         icon: 'VP',
-        color: '#ff2d55',
+        color: '#ff2d55', // Deep Blood Red
         maxHp: 100,
         speed: 6.0 * 1.125,
         jumpForce: 15.5 * 0.975,
@@ -249,7 +234,7 @@ const CHARACTER_PRESETS = {
     alchemist: {
         name: 'ALCHEMIST',
         icon: 'AL',
-        color: '#30d158',
+        color: '#30d158', // Mint
         maxHp: 95,
         speed: 5.0 * 1.125,
         jumpForce: 14.8 * 0.975,
@@ -265,37 +250,37 @@ const CHARACTER_PRESETS = {
 // --- MAP CONFIGURATIONS ---
 const MAPS = {
     cyber: {
-        background: '#040209',
-        gridColor: 'rgba(0, 255, 204, 0.12)',
+        background: '#0a0a10',
+        gridColor: 'rgba(0, 255, 204, 0.1)',
         platforms: [
-            { x: 0, y: 530, w: 1024, h: 46, border: '#00ffcc', fill: '#0a0915' },
-            { x: 150, y: 390, w: 220, h: 18, border: '#ff0055', fill: '#140510' },
-            { x: 654, y: 390, w: 220, h: 18, border: '#ff0055', fill: '#140510' },
-            { x: 387, y: 260, w: 250, h: 18, border: '#00ffcc', fill: '#0a0915' }
+            { x: 0, y: 530, w: 1024, h: 46, border: '#00ffcc', fill: '#101420' },
+            { x: 150, y: 390, w: 220, h: 18, border: '#ff0055', fill: '#201018' },
+            { x: 654, y: 390, w: 220, h: 18, border: '#ff0055', fill: '#201018' },
+            { x: 387, y: 260, w: 250, h: 18, border: '#00ffcc', fill: '#101420' }
         ],
         spawnP1: { x: 100, y: 440 },
         spawnP2: { x: 924, y: 440 }
     },
     sky: {
-        background: '#04151f',
+        background: '#08121e',
         gridColor: 'rgba(255, 255, 255, 0.05)',
         platforms: [
-            { x: 162, y: 480, w: 700, h: 30, border: '#00e5ff', fill: '#0b202e' },
-            { x: 262, y: 340, w: 200, h: 18, border: '#4cd964', fill: '#0d2b18' },
-            { x: 562, y: 340, w: 200, h: 18, border: '#4cd964', fill: '#0d2b18' },
-            { x: 412, y: 200, w: 200, h: 18, border: '#ffcc00', fill: '#2b2308' }
+            { x: 162, y: 480, w: 700, h: 30, border: '#00e5ff', fill: '#0f2438' },
+            { x: 262, y: 340, w: 200, h: 18, border: '#4cd964', fill: '#102e1c' },
+            { x: 562, y: 340, w: 200, h: 18, border: '#4cd964', fill: '#102e1c' },
+            { x: 412, y: 200, w: 200, h: 18, border: '#ffcc00', fill: '#332a10' }
         ],
         spawnP1: { x: 250, y: 380 },
         spawnP2: { x: 774, y: 380 }
     },
     temple: {
-        background: '#0d0d12',
+        background: '#0e0e14',
         gridColor: 'rgba(255, 204, 0, 0.08)',
         platforms: [
-            { x: 0, y: 530, w: 1024, h: 46, border: '#ffaa00', fill: '#19150b' },
-            { x: 80, y: 400, w: 180, h: 22, border: '#007aff', fill: '#04101e' },
-            { x: 764, y: 400, w: 180, h: 22, border: '#007aff', fill: '#04101e' },
-            { x: 312, y: 280, w: 400, h: 22, border: '#ffffff', fill: '#1c1c24' }
+            { x: 0, y: 530, w: 1024, h: 46, border: '#ffaa00', fill: '#221b10' },
+            { x: 80, y: 400, w: 180, h: 22, border: '#007aff', fill: '#0c1a2e' },
+            { x: 764, y: 400, w: 180, h: 22, border: '#007aff', fill: '#0c1a2e' },
+            { x: 312, y: 280, w: 400, h: 22, border: '#ffffff', fill: '#22222d' }
         ],
         spawnP1: { x: 100, y: 440 },
         spawnP2: { x: 924, y: 440 }
@@ -308,12 +293,12 @@ class Particle {
         this.x = x;
         this.y = y;
         this.color = color;
-        this.size = Math.random() * 5 + 2.5;
-        this.speedX = (Math.random() - 0.5) * 11 * speedScale;
-        this.speedY = (Math.random() - 0.5) * 11 * speedScale - 2.5;
-        this.gravity = 0.22;
+        this.size = Math.random() * 5 + 3;
+        this.speedX = (Math.random() - 0.5) * 12 * speedScale;
+        this.speedY = (Math.random() - 0.5) * 12 * speedScale - 2;
+        this.gravity = 0.25;
         this.alpha = 1;
-        this.decay = Math.random() * 0.02 + 0.012;
+        this.decay = Math.random() * 0.02 + 0.015;
     }
 
     update() {
@@ -327,8 +312,6 @@ class Particle {
         ctx.save();
         ctx.globalAlpha = Math.max(0, this.alpha);
         ctx.fillStyle = this.color;
-        ctx.shadowColor = this.color;
-        ctx.shadowBlur = 10;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
@@ -343,7 +326,7 @@ class Projectile {
         this.dx = dx;
         this.dy = dy;
         this.color = color;
-        this.size = size * 1.4;
+        this.size = size * 1.5;
         this.speed = speed;
         this.damage = damage;
         this.owner = owner; 
@@ -365,8 +348,8 @@ class Projectile {
         this.x += this.dx * this.speed;
         this.y += this.dy * this.speed;
 
-        if (Math.random() < 0.45) {
-            particles.push(new Particle(this.x, this.y, this.color, 0.25));
+        if (Math.random() < 0.5) {
+            particles.push(new Particle(this.x, this.y, this.color, 0.3));
         }
     }
 
@@ -374,20 +357,20 @@ class Projectile {
         ctx.save();
         ctx.fillStyle = this.color;
         ctx.shadowColor = this.color;
-        ctx.shadowBlur = 18;
+        ctx.shadowBlur = 15;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size * 0.45, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.size * 0.4, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
     }
 }
 
-// --- PLAYER CLASS ---
+// --- PLAYER CLASS (Stickman Graphics Architecture) ---
 class Player {
     constructor(id, x, y, charKey) {
         this.id = id;
@@ -396,7 +379,7 @@ class Player {
         this.charKey = charKey;
         this.config = CHARACTER_PRESETS[charKey];
         
-        this.width = 38;
+        this.width = 36;
         this.height = 56;
         
         this.hp = this.config.maxHp;
@@ -439,7 +422,6 @@ class Player {
             if (this.berserkDuration <= 0) this.berserkMode = false;
         }
         
-        // 점프속도 1.3배 가속 시 최고점 높이를 동일하게 보존하기 위한 상향된 중력 (0.4 * 1.69 = 0.676)
         const gravity = 0.676;
         this.vy += gravity;
         this.x += this.vx;
@@ -505,8 +487,8 @@ class Player {
         this.hp = Math.max(0, this.hp - dmgTaken);
         
         this.gainUlt(dmgTaken * 0.6);
-        screenShake = 10;
-        createHitParticles(this.x + this.width/2, this.y + this.height/2, this.config.color, 16);
+        screenShake = 12;
+        createHitParticles(this.x + this.width/2, this.y + this.height/2, this.config.color, 18);
     }
 
     gainUlt(amount) {
@@ -844,7 +826,7 @@ class Player {
         document.getElementById(`p${this.id}-ult`).style.width = `${this.ultGauge}%`;
     }
 
-    // --- 2D Vector Character Graphics ---
+    // --- PURE FLAT STICKMAN DRAWING ENGINE ---
     draw(ctx) {
         if (this.isInvisible) {
             ctx.save();
@@ -852,190 +834,140 @@ class Player {
         }
 
         ctx.save();
-        ctx.shadowColor = this.config.color;
-        ctx.shadowBlur = 12;
-
         const pX = this.x;
         const pY = this.y;
         const w = this.width;
         const h = this.height;
+        const centerX = pX + w / 2;
 
-        // Legs & Feet
-        ctx.fillStyle = '#111';
-        ctx.fillRect(pX + 6, pY + h - 10, 8, 10);
-        ctx.fillRect(pX + w - 14, pY + h - 10, 8, 10);
+        const charColor = this.config.color;
         
-        ctx.fillStyle = this.config.color;
-        ctx.fillRect(pX + 4, pY + h - 4, 11, 5);
-        ctx.fillRect(pX + w - 15, pY + h - 4, 11, 5);
+        ctx.strokeStyle = charColor;
+        ctx.fillStyle = charColor;
+        ctx.lineWidth = 7;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
 
-        // Body Armor
-        let bodyGrad = ctx.createLinearGradient(pX, pY + 16, pX, pY + h - 10);
-        bodyGrad.addColorStop(0, this.config.color);
-        bodyGrad.addColorStop(0.6, this.config.color);
-        bodyGrad.addColorStop(1, '#0e0b16');
-        ctx.fillStyle = bodyGrad;
-        
-        drawRoundedRect(ctx, pX + 2, pY + 16, w - 4, h - 26, 6);
+        // 1. 머리 (선명한 커다란 원)
+        const headRadius = 14;
+        const headY = pY + headRadius + 2;
+        ctx.beginPath();
+        ctx.arc(centerX, headY, headRadius, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1.5;
-        drawRoundedRect(ctx, pX + 2, pY + 16, w - 4, h - 26, 6);
+
+        // 2. 몸통 (척추)
+        const neckY = headY + headRadius;
+        const pelvisY = pY + h - 18;
+        ctx.beginPath();
+        ctx.moveTo(centerX, neckY);
+        ctx.lineTo(centerX, pelvisY);
         ctx.stroke();
 
-        // Skin Face
-        ctx.fillStyle = '#ffd1b3';
+        // 3. 다리 (이동/점프 모션)
+        let legOffset = Math.sin(Date.now() * 0.018) * (Math.abs(this.vx) > 0.1 ? 12 : 2);
+        if (!this.isGrounded) legOffset = 10;
+
+        // 왼다리
         ctx.beginPath();
-        ctx.arc(pX + w/2, pY + 12, 10, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(centerX, pelvisY);
+        ctx.lineTo(centerX - 8 - legOffset * 0.5, pelvisY + 10);
+        ctx.lineTo(centerX - 10 - legOffset, pY + h);
+        ctx.stroke();
 
-        // Headgear / Hair
-        ctx.fillStyle = '#222';
-        if (this.charKey === 'swordsman' || this.charKey === 'berserker') {
-            ctx.fillStyle = this.charKey === 'swordsman' ? '#8e8e93' : '#ff3b30';
-            ctx.beginPath();
-            ctx.arc(pX + w/2, pY + 8, 11, Math.PI, 0);
-            ctx.fill();
-            ctx.fillStyle = '#ff2d55';
-            ctx.fillRect(pX + w/2 - 2, pY - 5, 4, 6);
-        } else if (this.charKey === 'mage' || this.charKey === 'necromancer') {
-            ctx.fillStyle = this.charKey === 'mage' ? '#5856d6' : '#1d1d26';
-            ctx.beginPath();
-            ctx.moveTo(pX + w/2 - 12, pY + 6);
-            ctx.lineTo(pX + w/2, pY - 10);
-            ctx.lineTo(pX + w/2 + 12, pY + 6);
-            ctx.closePath();
-            ctx.fill();
-        } else if (this.charKey === 'ninja') {
-            ctx.fillStyle = '#2c2c2e';
-            ctx.beginPath();
-            ctx.arc(pX + w/2, pY + 12, 11, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = '#ffd1b3';
-            ctx.fillRect(pX + w/2 - 7, pY + 9, 14, 5);
-        } else if (this.charKey === 'archer' || this.charKey === 'rogue') {
-            ctx.fillStyle = this.config.color;
-            ctx.beginPath();
-            ctx.arc(pX + w/2, pY + 11, 12, Math.PI, 0);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(pX + w/2 - 12, pY + 11);
-            ctx.lineTo(pX + w/2 - 5, pY + 20);
-            ctx.lineTo(pX + w/2 + 5, pY + 20);
-            ctx.lineTo(pX + w/2 + 12, pY + 11);
-            ctx.fill();
-        } else if (this.charKey === 'paladin') {
-            ctx.fillStyle = '#ffcc00';
-            ctx.beginPath();
-            ctx.arc(pX + w/2, pY + 8, 11, Math.PI, 0);
-            ctx.fill();
-            ctx.fillRect(pX + w/2 - 3, pY - 4, 6, 6);
-        }
+        // 오른다리
+        ctx.beginPath();
+        ctx.moveTo(centerX, pelvisY);
+        ctx.lineTo(centerX + 8 + legOffset * 0.5, pelvisY + 10);
+        ctx.lineTo(centerX + 10 + legOffset, pY + h);
+        ctx.stroke();
 
-        // Eyes
-        ctx.fillStyle = '#000';
-        let eyeX = this.facing === 1 ? pX + w/2 + 3 : pX + w/2 - 7;
-        ctx.fillRect(eyeX, pY + 9, 4, 5);
-        ctx.fillStyle = this.charKey === 'vampire' ? '#ff0000' : '#00ffff';
-        ctx.fillRect(this.facing === 1 ? eyeX + 2 : eyeX, pY + 10, 2, 3);
+        // 4. 팔 및 무기
+        const shoulderY = neckY + 6;
+        const handX = centerX + this.facing * 18;
+        const handY = shoulderY + (this.isAttacking ? -4 : 8);
 
-        // Weapon
-        ctx.restore();
+        // 뒷팔
+        ctx.beginPath();
+        ctx.moveTo(centerX, shoulderY);
+        ctx.lineTo(centerX - this.facing * 8, shoulderY + 8);
+        ctx.lineTo(centerX - this.facing * 14, shoulderY + 16);
+        ctx.stroke();
+
+        // 앞팔
+        ctx.beginPath();
+        ctx.moveTo(centerX, shoulderY);
+        ctx.lineTo(centerX + this.facing * 10, shoulderY + (this.isAttacking ? -6 : 4));
+        ctx.lineTo(handX, handY);
+        ctx.stroke();
+
+        // 5. 대전 스틱맨 특유의 두껍고 명확한 플랫 무기 스타일 (이미지 100% 동일)
         ctx.save();
-        ctx.shadowColor = this.config.color;
-        ctx.shadowBlur = 12;
+        ctx.shadowColor = charColor;
+        ctx.shadowBlur = 8;
 
-        let handX = this.facing === 1 ? pX + w - 2 : pX + 2;
-        let handY = pY + 30;
-
-        if (this.charKey === 'swordsman' || this.charKey === 'berserker' || this.charKey === 'reaper') {
-            ctx.strokeStyle = this.charKey === 'reaper' ? '#55555d' : '#e5e5ea';
-            ctx.lineWidth = 3.5;
+        if (this.charKey === 'swordsman' || this.charKey === 'berserker' || this.charKey === 'reaper' || this.charKey === 'rogue' || this.charKey === 'brawler' || this.charKey === 'vampire') {
+            // 이미지 속 선명하고 두꺼운 단색 양손 칼
+            ctx.strokeStyle = this.id === 1 ? '#00e5ff' : '#ff9500'; // 고대비 칼라 무기
+            if (this.charKey === 'berserker') ctx.strokeStyle = '#ff3b30';
+            if (this.charKey === 'reaper') ctx.strokeStyle = '#34c759';
+            ctx.lineWidth = 7;
             ctx.beginPath();
             ctx.moveTo(handX, handY);
-            ctx.lineTo(handX + this.facing * 20, handY - 14);
+            let swordAngle = this.isAttacking ? (this.facing === 1 ? Math.PI/4 : 3*Math.PI/4) : (this.facing === 1 ? -Math.PI/4 : -3*Math.PI/4);
+            ctx.lineTo(handX + Math.cos(swordAngle) * 34, handY + Math.sin(swordAngle) * 34);
             ctx.stroke();
-
-            ctx.fillStyle = '#fff';
+        } else if (this.charKey === 'lancer' || this.charKey === 'paladin') {
+            ctx.strokeStyle = '#5ac8fa';
+            ctx.lineWidth = 6;
             ctx.beginPath();
-            ctx.arc(handX + this.facing * 20, handY - 14, 4, 0, Math.PI*2);
-            ctx.fill();
-        } else if (this.charKey === 'lancer') {
-            ctx.strokeStyle = '#d1d1d6';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.moveTo(handX - this.facing * 8, handY + 10);
-            ctx.lineTo(handX + this.facing * 28, handY - 14);
+            ctx.moveTo(handX - this.facing * 12, handY + 12);
+            ctx.lineTo(handX + this.facing * 40, handY - 12);
             ctx.stroke();
-            ctx.fillStyle = '#5ac8fa';
+        } else if (this.charKey === 'mage' || this.charKey === 'necromancer' || this.charKey === 'alchemist') {
+            ctx.strokeStyle = '#ffcc00';
+            ctx.lineWidth = 5;
             ctx.beginPath();
-            ctx.moveTo(handX + this.facing * 28, handY - 14);
-            ctx.lineTo(handX + this.facing * 34, handY - 18);
-            ctx.lineTo(handX + this.facing * 26, handY - 20);
-            ctx.fill();
-        } else if (this.charKey === 'mage' || this.charKey === 'necromancer') {
-            ctx.strokeStyle = '#ac8e68';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(handX, handY + 8);
-            ctx.lineTo(handX + this.facing * 12, handY - 12);
+            ctx.moveTo(handX, handY + 10);
+            ctx.lineTo(handX + this.facing * 16, handY - 20);
             ctx.stroke();
-            
-            ctx.fillStyle = this.config.color;
+            ctx.fillStyle = charColor;
             ctx.beginPath();
-            ctx.arc(handX + this.facing * 12, handY - 12, 6, 0, Math.PI * 2);
+            ctx.arc(handX + this.facing * 16, handY - 20, 7, 0, Math.PI*2);
             ctx.fill();
         } else if (this.charKey === 'archer') {
-            ctx.strokeStyle = '#ff9500';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#4cd964';
+            ctx.lineWidth = 5;
             ctx.beginPath();
-            ctx.arc(handX + this.facing * 6, handY, 12, -Math.PI/2, Math.PI/2);
+            ctx.arc(handX + this.facing * 8, handY, 18, -Math.PI/2, Math.PI/2);
             ctx.stroke();
         } else if (this.charKey === 'gunner') {
-            ctx.fillStyle = '#555';
-            ctx.fillRect(handX, handY - 4, 12 * this.facing, 6);
-            ctx.fillRect(handX + (this.facing === 1 ? 2 : -4), handY, 4, 8);
-        }
-
-        if (this.isShielded) {
-            ctx.save();
-            ctx.strokeStyle = '#00e5ff';
-            ctx.shadowColor = '#00e5ff';
-            ctx.shadowBlur = 15;
-            ctx.lineWidth = 3.5;
+            ctx.fillStyle = '#ffcc00';
+            ctx.fillRect(handX, handY - 4, 18 * this.facing, 8);
+        } else if (this.charKey === 'ninja') {
+            // 머리 띠
+            ctx.strokeStyle = '#ff0055';
+            ctx.lineWidth = 4;
             ctx.beginPath();
-            ctx.arc(pX + w/2, pY + h/2, h/2 + 6, 0, Math.PI*2);
+            ctx.moveTo(centerX - this.facing * 10, headY);
+            ctx.lineTo(centerX - this.facing * 24, headY + 8);
             ctx.stroke();
-            ctx.restore();
-        }
-
-        if (this.berserkMode) {
-            ctx.save();
-            ctx.strokeStyle = '#ff3b30';
-            ctx.shadowColor = '#ff3b30';
-            ctx.shadowBlur = 15;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(pX + w/2, pY + h/2, h/2 + 4, 0, Math.PI*2);
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        if (this.isAttacking && (this.charKey === 'swordsman' || this.charKey === 'berserker' || this.charKey === 'brawler' || this.charKey === 'lancer' || this.charKey === 'paladin' || this.charKey === 'reaper' || this.charKey === 'vampire' || this.charKey === 'rogue')) {
-            ctx.save();
-            ctx.fillStyle = this.config.color;
-            ctx.globalAlpha = 0.45;
-            ctx.shadowColor = this.config.color;
-            ctx.shadowBlur = 15;
-            ctx.fillRect(this.attackBox.x, this.attackBox.y, this.attackBox.w, this.attackBox.h);
-            ctx.restore();
         }
 
         ctx.restore();
+
+        // 6. 특수 오라 효과
+        if (this.isShielded) {
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(centerX, headY + 15, 34, 0, Math.PI*2);
+            ctx.stroke();
+        }
 
         if (this.isInvisible) {
             ctx.restore();
         }
+        ctx.restore();
     }
 }
 
