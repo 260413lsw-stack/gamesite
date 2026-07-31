@@ -1,5 +1,5 @@
 // Bounce Attack - Tekken Style Stickman Edition
-// 0.65x Balanced Jump Force, Expanded Melee Attack Box Ranges (1.6x-1.8x), and Viewport-Fitted 2 Horizontal Map Layout
+// Boosted 1.5x Jump Force (1.3923 Scale Factor)
 
 const CANVAS_WIDTH = 2048;
 const CANVAS_HEIGHT = 1152;
@@ -52,22 +52,22 @@ function playBgm() {
 }
 
 // --- CHARACTER CONFIGURATIONS ---
-// 점프력 0.65배 보정 (1.428 * 0.65 = 0.9282)
+// 점프력 1.5배 늘림 (0.9282 * 1.5 = 1.3923)
 const CHARACTER_PRESETS = {
-    swordsman: { name: 'SWORDSMAN', icon: 'SW', color: '#ff9500', maxHp: 120, speed: 6.5 * 0.84375, jumpForce: 15.5 * 0.9282, basicDamage: 12, specialDamage: 22, ultDamage: 45, basicCd: 400, specialCd: 1200, ultCd: 4000 },
-    mage: { name: 'MAGE', icon: 'MG', color: '#ff2d55', maxHp: 90, speed: 5.0 * 0.84375, jumpForce: 15.0 * 0.9282, basicDamage: 10, specialDamage: 26, ultDamage: 50, basicCd: 500, specialCd: 1400, ultCd: 4800 },
-    archer: { name: 'ARCHER', icon: 'AR', color: '#4cd964', maxHp: 95, speed: 6.0 * 0.84375, jumpForce: 16.0 * 0.9282, basicDamage: 8, specialDamage: 18, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4200 },
-    rogue: { name: 'ROGUE', icon: 'RG', color: '#bf5af2', maxHp: 90, speed: 8.0 * 0.84375, jumpForce: 17.5 * 0.9282, basicDamage: 11, specialDamage: 20, ultDamage: 38, basicCd: 300, specialCd: 1000, ultCd: 3500 },
-    lancer: { name: 'LANCER', icon: 'LC', color: '#5ac8fa', maxHp: 110, speed: 6.0 * 0.84375, jumpForce: 15.0 * 0.9282, basicDamage: 13, specialDamage: 22, ultDamage: 42, basicCd: 500, specialCd: 1300, ultCd: 4000 },
-    berserker: { name: 'BERSERKER', icon: 'BS', color: '#ff3b30', maxHp: 140, speed: 5.5 * 0.84375, jumpForce: 14.5 * 0.9282, basicDamage: 15, specialDamage: 28, ultDamage: 52, basicCd: 650, specialCd: 1600, ultCd: 4800 },
-    gunner: { name: 'GUNNER', icon: 'GN', color: '#ffcc00', maxHp: 85, speed: 5.5 * 0.84375, jumpForce: 14.0 * 0.9282, basicDamage: 7, specialDamage: 17, ultDamage: 38, basicCd: 220, specialCd: 1000, ultCd: 3800 },
-    ninja: { name: 'NINJA', icon: 'NJ', color: '#00e5ff', maxHp: 90, speed: 7.5 * 0.84375, jumpForce: 16.5 * 0.9282, basicDamage: 9, specialDamage: 19, ultDamage: 38, basicCd: 320, specialCd: 850, ultCd: 3600 },
-    brawler: { name: 'BRAWLER', icon: 'BR', color: '#e040fb', maxHp: 115, speed: 6.5 * 0.84375, jumpForce: 15.0 * 0.9282, basicDamage: 12, specialDamage: 22, ultDamage: 42, basicCd: 380, specialCd: 1100, ultCd: 4000 },
-    necromancer: { name: 'NECROMANCER', icon: 'NC', color: '#8e8e93', maxHp: 95, speed: 4.8 * 0.84375, jumpForce: 14.5 * 0.9282, basicDamage: 9, specialDamage: 22, ultDamage: 45, basicCd: 600, specialCd: 1500, ultCd: 4800 },
-    paladin: { name: 'PALADIN', icon: 'PL', color: '#0a84ff', maxHp: 150, speed: 4.5 * 0.84375, jumpForce: 14.0 * 0.9282, basicDamage: 10, specialDamage: 18, ultDamage: 35, basicCd: 550, specialCd: 1800, ultCd: 4800 },
-    reaper: { name: 'REAPER', icon: 'RP', color: '#34c759', maxHp: 105, speed: 5.5 * 0.84375, jumpForce: 15.0 * 0.9282, basicDamage: 14, specialDamage: 25, ultDamage: 45, basicCd: 550, specialCd: 1300, ultCd: 4200 },
-    vampire: { name: 'VAMPIRE', icon: 'VP', color: '#ff2d55', maxHp: 100, speed: 6.0 * 0.84375, jumpForce: 15.5 * 0.9282, basicDamage: 10, specialDamage: 21, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4000 },
-    alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 0.9282, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
+    swordsman: { name: 'SWORDSMAN', icon: 'SW', color: '#ff9500', maxHp: 120, speed: 6.5 * 0.84375, jumpForce: 15.5 * 1.3923, basicDamage: 12, specialDamage: 22, ultDamage: 45, basicCd: 400, specialCd: 1200, ultCd: 4000 },
+    mage: { name: 'MAGE', icon: 'MG', color: '#ff2d55', maxHp: 90, speed: 5.0 * 0.84375, jumpForce: 15.0 * 1.3923, basicDamage: 10, specialDamage: 26, ultDamage: 50, basicCd: 500, specialCd: 1400, ultCd: 4800 },
+    archer: { name: 'ARCHER', icon: 'AR', color: '#4cd964', maxHp: 95, speed: 6.0 * 0.84375, jumpForce: 16.0 * 1.3923, basicDamage: 8, specialDamage: 18, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4200 },
+    rogue: { name: 'ROGUE', icon: 'RG', color: '#bf5af2', maxHp: 90, speed: 8.0 * 0.84375, jumpForce: 17.5 * 1.3923, basicDamage: 11, specialDamage: 20, ultDamage: 38, basicCd: 300, specialCd: 1000, ultCd: 3500 },
+    lancer: { name: 'LANCER', icon: 'LC', color: '#5ac8fa', maxHp: 110, speed: 6.0 * 0.84375, jumpForce: 15.0 * 1.3923, basicDamage: 13, specialDamage: 22, ultDamage: 42, basicCd: 500, specialCd: 1300, ultCd: 4000 },
+    berserker: { name: 'BERSERKER', icon: 'BS', color: '#ff3b30', maxHp: 140, speed: 5.5 * 0.84375, jumpForce: 14.5 * 1.3923, basicDamage: 15, specialDamage: 28, ultDamage: 52, basicCd: 650, specialCd: 1600, ultCd: 4800 },
+    gunner: { name: 'GUNNER', icon: 'GN', color: '#ffcc00', maxHp: 85, speed: 5.5 * 0.84375, jumpForce: 14.0 * 1.3923, basicDamage: 7, specialDamage: 17, ultDamage: 38, basicCd: 220, specialCd: 1000, ultCd: 3800 },
+    ninja: { name: 'NINJA', icon: 'NJ', color: '#00e5ff', maxHp: 90, speed: 7.5 * 0.84375, jumpForce: 16.5 * 1.3923, basicDamage: 9, specialDamage: 19, ultDamage: 38, basicCd: 320, specialCd: 850, ultCd: 3600 },
+    brawler: { name: 'BRAWLER', icon: 'BR', color: '#e040fb', maxHp: 115, speed: 6.5 * 0.84375, jumpForce: 15.0 * 1.3923, basicDamage: 12, specialDamage: 22, ultDamage: 42, basicCd: 380, specialCd: 1100, ultCd: 4000 },
+    necromancer: { name: 'NECROMANCER', icon: 'NC', color: '#8e8e93', maxHp: 95, speed: 4.8 * 0.84375, jumpForce: 14.5 * 1.3923, basicDamage: 9, specialDamage: 22, ultDamage: 45, basicCd: 600, specialCd: 1500, ultCd: 4800 },
+    paladin: { name: 'PALADIN', icon: 'PL', color: '#0a84ff', maxHp: 150, speed: 4.5 * 0.84375, jumpForce: 14.0 * 1.3923, basicDamage: 10, specialDamage: 18, ultDamage: 35, basicCd: 550, specialCd: 1800, ultCd: 4800 },
+    reaper: { name: 'REAPER', icon: 'RP', color: '#34c759', maxHp: 105, speed: 5.5 * 0.84375, jumpForce: 15.0 * 1.3923, basicDamage: 14, specialDamage: 25, ultDamage: 45, basicCd: 550, specialCd: 1300, ultCd: 4200 },
+    vampire: { name: 'VAMPIRE', icon: 'VP', color: '#ff2d55', maxHp: 100, speed: 6.0 * 0.84375, jumpForce: 15.5 * 1.3923, basicDamage: 10, specialDamage: 21, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4000 },
+    alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 1.3923, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
 };
 
 // --- 2 REFINED EXPANDED MAPS ---
@@ -429,7 +429,6 @@ class Player {
         this.ultGauge = Math.min(100, this.ultGauge + amount);
     }
 
-    // EXPANDED MELEE ATTACK BOX RANGES (1.6x-1.8x Reach Boost)
     useBasicAttack(opponent) {
         const now = Date.now();
         let cd = this.config.basicCd;
