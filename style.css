@@ -483,14 +483,17 @@ body {
 }
 
 .map-grid {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 40px;
-    width: 85%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+    width: 90%;
+    max-height: 380px;
+    overflow-y: auto;
+    padding: 10px;
 }
 
 .map-card {
-    flex: 1;
     background: rgba(255, 255, 255, 0.05);
     border: 2px solid var(--border-color);
     border-radius: 12px;
@@ -510,26 +513,58 @@ body {
 
 .map-preview {
     width: 100%;
-    height: 120px;
+    height: 90px;
     border-radius: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     background-size: cover;
     background-position: center;
 }
 
 .cyber-bg {
-    background: linear-gradient(135deg, #1b003a, #00123a);
-    box-shadow: inset 0 0 20px rgba(0, 255, 204, 0.3);
+    background-color: #040209;
+    border: 1px solid #00ffcc;
+    background-image: radial-gradient(#00ffcc 1px, transparent 1px);
+    background-size: 10px 10px;
 }
 
 .sky-bg {
-    background: linear-gradient(180deg, #005f73, #0a9396);
-    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2);
+    background-color: #04151f;
+    border: 1px solid #00e5ff;
+    background-image: linear-gradient(0deg, #00e5ff 1px, transparent 1px);
+    background-size: 100% 20px;
 }
 
 .temple-bg {
-    background: linear-gradient(135deg, #2b2d42, #1d1e2c);
-    box-shadow: inset 0 0 20px rgba(255, 204, 0, 0.2);
+    background-color: #0d0d12;
+    border: 1px solid #ffaa00;
+    background-image: radial-gradient(#ffaa00 1px, transparent 1px);
+    background-size: 15px 15px;
+}
+
+.soccer-bg {
+    background-color: #0d47a1;
+    border: 1px solid #00e676;
+    background-image: repeating-linear-gradient(45deg, #00c853 0, #00c853 15px, #1b5e20 15px, #1b5e20 30px);
+}
+
+.volcano-bg {
+    background-color: #1a0000;
+    border: 1px solid #ff3d00;
+    background-image: radial-gradient(#ff3d00 1.5px, transparent 1.5px);
+    background-size: 12px 12px;
+}
+
+.space-bg {
+    background-color: #050014;
+    border: 1px solid #d500f9;
+    background-image: radial-gradient(#ffffff 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.dojo-bg {
+    background-color: #1c100b;
+    border: 1px solid #ffab00;
+    background-image: repeating-linear-gradient(0deg, #3e2723 0, #3e2723 10px, #1c100b 10px, #1c100b 20px);
 }
 
 .map-name {

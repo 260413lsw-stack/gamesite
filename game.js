@@ -1,5 +1,5 @@
-// Bounce Attack - Stickman Edition
-// Game Logic and Engine (Expanded 2K Arena)
+// Bounce Attack - Ragdoll Stickman Edition
+// Physics & 7 Arena Maps Engine
 
 const CANVAS_WIDTH = 2048;
 const CANVAS_HEIGHT = 1152;
@@ -18,6 +18,7 @@ let currentGameState = STATE.MENU;
 let keys = {};
 let particles = [];
 let projectiles = [];
+let soccerBalls = [];
 let screenShake = 0;
 let gameTimer = 99;
 let timerInterval = null;
@@ -47,211 +48,30 @@ function playBgm() {
 }
 
 // --- CHARACTER CONFIGURATIONS ---
-// 이동속도 0.75배, 점프력 1.3배 상향 적용
 const CHARACTER_PRESETS = {
-    swordsman: {
-        name: 'SWORDSMAN',
-        icon: 'SW',
-        color: '#ff9500',
-        maxHp: 120,
-        speed: 6.5 * 0.84375,
-        jumpForce: 15.5 * 1.2675,
-        basicDamage: 12,
-        specialDamage: 22,
-        ultDamage: 45,
-        basicCd: 400,
-        specialCd: 1200,
-        ultCd: 4000
-    },
-    mage: {
-        name: 'MAGE',
-        icon: 'MG',
-        color: '#ff2d55',
-        maxHp: 90,
-        speed: 5.0 * 0.84375,
-        jumpForce: 15.0 * 1.2675,
-        basicDamage: 10,
-        specialDamage: 26,
-        ultDamage: 50,
-        basicCd: 500,
-        specialCd: 1400,
-        ultCd: 4800
-    },
-    archer: {
-        name: 'ARCHER',
-        icon: 'AR',
-        color: '#4cd964',
-        maxHp: 95,
-        speed: 6.0 * 0.84375,
-        jumpForce: 16.0 * 1.2675,
-        basicDamage: 8,
-        specialDamage: 18,
-        ultDamage: 40,
-        basicCd: 450,
-        specialCd: 1200,
-        ultCd: 4200
-    },
-    rogue: {
-        name: 'ROGUE',
-        icon: 'RG',
-        color: '#bf5af2',
-        maxHp: 90,
-        speed: 8.0 * 0.84375,
-        jumpForce: 17.5 * 1.2675,
-        basicDamage: 11,
-        specialDamage: 20,
-        ultDamage: 38,
-        basicCd: 300,
-        specialCd: 1000,
-        ultCd: 3500
-    },
-    lancer: {
-        name: 'LANCER',
-        icon: 'LC',
-        color: '#5ac8fa',
-        maxHp: 110,
-        speed: 6.0 * 0.84375,
-        jumpForce: 15.0 * 1.2675,
-        basicDamage: 13,
-        specialDamage: 22,
-        ultDamage: 42,
-        basicCd: 500,
-        specialCd: 1300,
-        ultCd: 4000
-    },
-    berserker: {
-        name: 'BERSERKER',
-        icon: 'BS',
-        color: '#ff3b30',
-        maxHp: 140,
-        speed: 5.5 * 0.84375,
-        jumpForce: 14.5 * 1.2675,
-        basicDamage: 15,
-        specialDamage: 28,
-        ultDamage: 52,
-        basicCd: 650,
-        specialCd: 1600,
-        ultCd: 4800
-    },
-    gunner: {
-        name: 'GUNNER',
-        icon: 'GN',
-        color: '#ffcc00',
-        maxHp: 85,
-        speed: 5.5 * 0.84375,
-        jumpForce: 14.0 * 1.2675,
-        basicDamage: 7,
-        specialDamage: 17,
-        ultDamage: 38,
-        basicCd: 220,
-        specialCd: 1000,
-        ultCd: 3800
-    },
-    ninja: {
-        name: 'NINJA',
-        icon: 'NJ',
-        color: '#00e5ff',
-        maxHp: 90,
-        speed: 7.5 * 0.84375,
-        jumpForce: 16.5 * 1.2675,
-        basicDamage: 9,
-        specialDamage: 19,
-        ultDamage: 38,
-        basicCd: 320,
-        specialCd: 850,
-        ultCd: 3600
-    },
-    brawler: {
-        name: 'BRAWLER',
-        icon: 'BR',
-        color: '#e040fb',
-        maxHp: 115,
-        speed: 6.5 * 0.84375,
-        jumpForce: 15.0 * 1.2675,
-        basicDamage: 12,
-        specialDamage: 22,
-        ultDamage: 42,
-        basicCd: 380,
-        specialCd: 1100,
-        ultCd: 4000
-    },
-    necromancer: {
-        name: 'NECROMANCER',
-        icon: 'NC',
-        color: '#8e8e93',
-        maxHp: 95,
-        speed: 4.8 * 0.84375,
-        jumpForce: 14.5 * 1.2675,
-        basicDamage: 9,
-        specialDamage: 22,
-        ultDamage: 45,
-        basicCd: 600,
-        specialCd: 1500,
-        ultCd: 4800
-    },
-    paladin: {
-        name: 'PALADIN',
-        icon: 'PL',
-        color: '#0a84ff',
-        maxHp: 150,
-        speed: 4.5 * 0.84375,
-        jumpForce: 14.0 * 1.2675,
-        basicDamage: 10,
-        specialDamage: 18,
-        ultDamage: 35,
-        basicCd: 550,
-        specialCd: 1800,
-        ultCd: 4800
-    },
-    reaper: {
-        name: 'REAPER',
-        icon: 'RP',
-        color: '#34c759',
-        maxHp: 105,
-        speed: 5.5 * 0.84375,
-        jumpForce: 15.0 * 1.2675,
-        basicDamage: 14,
-        specialDamage: 25,
-        ultDamage: 45,
-        basicCd: 550,
-        specialCd: 1300,
-        ultCd: 4200
-    },
-    vampire: {
-        name: 'VAMPIRE',
-        icon: 'VP',
-        color: '#ff2d55',
-        maxHp: 100,
-        speed: 6.0 * 0.84375,
-        jumpForce: 15.5 * 1.2675,
-        basicDamage: 10,
-        specialDamage: 21,
-        ultDamage: 40,
-        basicCd: 450,
-        specialCd: 1200,
-        ultCd: 4000
-    },
-    alchemist: {
-        name: 'ALCHEMIST',
-        icon: 'AL',
-        color: '#30d158',
-        maxHp: 95,
-        speed: 5.0 * 0.84375,
-        jumpForce: 14.8 * 1.2675,
-        basicDamage: 8,
-        specialDamage: 23,
-        ultDamage: 38,
-        basicCd: 500,
-        specialCd: 1400,
-        ultCd: 4200
-    }
+    swordsman: { name: 'SWORDSMAN', icon: 'SW', color: '#ff9500', maxHp: 120, speed: 6.5 * 0.84375, jumpForce: 15.5 * 1.2675, basicDamage: 12, specialDamage: 22, ultDamage: 45, basicCd: 400, specialCd: 1200, ultCd: 4000 },
+    mage: { name: 'MAGE', icon: 'MG', color: '#ff2d55', maxHp: 90, speed: 5.0 * 0.84375, jumpForce: 15.0 * 1.2675, basicDamage: 10, specialDamage: 26, ultDamage: 50, basicCd: 500, specialCd: 1400, ultCd: 4800 },
+    archer: { name: 'ARCHER', icon: 'AR', color: '#4cd964', maxHp: 95, speed: 6.0 * 0.84375, jumpForce: 16.0 * 1.2675, basicDamage: 8, specialDamage: 18, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4200 },
+    rogue: { name: 'ROGUE', icon: 'RG', color: '#bf5af2', maxHp: 90, speed: 8.0 * 0.84375, jumpForce: 17.5 * 1.2675, basicDamage: 11, specialDamage: 20, ultDamage: 38, basicCd: 300, specialCd: 1000, ultCd: 3500 },
+    lancer: { name: 'LANCER', icon: 'LC', color: '#5ac8fa', maxHp: 110, speed: 6.0 * 0.84375, jumpForce: 15.0 * 1.2675, basicDamage: 13, specialDamage: 22, ultDamage: 42, basicCd: 500, specialCd: 1300, ultCd: 4000 },
+    berserker: { name: 'BERSERKER', icon: 'BS', color: '#ff3b30', maxHp: 140, speed: 5.5 * 0.84375, jumpForce: 14.5 * 1.2675, basicDamage: 15, specialDamage: 28, ultDamage: 52, basicCd: 650, specialCd: 1600, ultCd: 4800 },
+    gunner: { name: 'GUNNER', icon: 'GN', color: '#ffcc00', maxHp: 85, speed: 5.5 * 0.84375, jumpForce: 14.0 * 1.2675, basicDamage: 7, specialDamage: 17, ultDamage: 38, basicCd: 220, specialCd: 1000, ultCd: 3800 },
+    ninja: { name: 'NINJA', icon: 'NJ', color: '#00e5ff', maxHp: 90, speed: 7.5 * 0.84375, jumpForce: 16.5 * 1.2675, basicDamage: 9, specialDamage: 19, ultDamage: 38, basicCd: 320, specialCd: 850, ultCd: 3600 },
+    brawler: { name: 'BRAWLER', icon: 'BR', color: '#e040fb', maxHp: 115, speed: 6.5 * 0.84375, jumpForce: 15.0 * 1.2675, basicDamage: 12, specialDamage: 22, ultDamage: 42, basicCd: 380, specialCd: 1100, ultCd: 4000 },
+    necromancer: { name: 'NECROMANCER', icon: 'NC', color: '#8e8e93', maxHp: 95, speed: 4.8 * 0.84375, jumpForce: 14.5 * 1.2675, basicDamage: 9, specialDamage: 22, ultDamage: 45, basicCd: 600, specialCd: 1500, ultCd: 4800 },
+    paladin: { name: 'PALADIN', icon: 'PL', color: '#0a84ff', maxHp: 150, speed: 4.5 * 0.84375, jumpForce: 14.0 * 1.2675, basicDamage: 10, specialDamage: 18, ultDamage: 35, basicCd: 550, specialCd: 1800, ultCd: 4800 },
+    reaper: { name: 'REAPER', icon: 'RP', color: '#34c759', maxHp: 105, speed: 5.5 * 0.84375, jumpForce: 15.0 * 1.2675, basicDamage: 14, specialDamage: 25, ultDamage: 45, basicCd: 550, specialCd: 1300, ultCd: 4200 },
+    vampire: { name: 'VAMPIRE', icon: 'VP', color: '#ff2d55', maxHp: 100, speed: 6.0 * 0.84375, jumpForce: 15.5 * 1.2675, basicDamage: 10, specialDamage: 21, ultDamage: 40, basicCd: 450, specialCd: 1200, ultCd: 4000 },
+    alchemist: { name: 'ALCHEMIST', icon: 'AL', color: '#30d158', maxHp: 95, speed: 5.0 * 0.84375, jumpForce: 14.8 * 1.2675, basicDamage: 8, specialDamage: 23, ultDamage: 38, basicCd: 500, specialCd: 1400, ultCd: 4200 }
 };
 
-// --- MAP CONFIGURATIONS (2X Expanded Arena) ---
+// --- 7 DISTINCT BATTLEFIELD MAPS ---
 const MAPS = {
     cyber: {
+        name: 'CYBER CITY',
         background: '#0a0a10',
         gridColor: 'rgba(0, 255, 204, 0.1)',
+        gravity: 0.676,
         platforms: [
             { x: 0, y: 1060, w: 2048, h: 92, border: '#00ffcc', fill: '#101420' },
             { x: 300, y: 780, w: 440, h: 36, border: '#ff0055', fill: '#201018' },
@@ -262,8 +82,10 @@ const MAPS = {
         spawnP2: { x: 1848, y: 880 }
     },
     sky: {
+        name: 'SKY ISLAND',
         background: '#08121e',
         gridColor: 'rgba(255, 255, 255, 0.05)',
+        gravity: 0.676,
         platforms: [
             { x: 324, y: 960, w: 1400, h: 60, border: '#00e5ff', fill: '#0f2438' },
             { x: 524, y: 680, w: 400, h: 36, border: '#4cd964', fill: '#102e1c' },
@@ -274,8 +96,10 @@ const MAPS = {
         spawnP2: { x: 1548, y: 760 }
     },
     temple: {
+        name: 'ANCIENT TEMPLE',
         background: '#0e0e14',
         gridColor: 'rgba(255, 204, 0, 0.08)',
+        gravity: 0.676,
         platforms: [
             { x: 0, y: 1060, w: 2048, h: 92, border: '#ffaa00', fill: '#221b10' },
             { x: 160, y: 800, w: 360, h: 44, border: '#007aff', fill: '#0c1a2e' },
@@ -284,10 +108,67 @@ const MAPS = {
         ],
         spawnP1: { x: 200, y: 880 },
         spawnP2: { x: 1848, y: 880 }
+    },
+    soccer: {
+        name: 'SOCCER STADIUM',
+        background: '#092d1c',
+        gridColor: 'rgba(0, 230, 118, 0.15)',
+        gravity: 0.676,
+        platforms: [
+            { x: 0, y: 1060, w: 2048, h: 92, border: '#00e676', fill: '#0f4028' },
+            { x: 0, y: 650, w: 240, h: 40, border: '#ffffff', fill: '#0f4028' },
+            { x: 1808, y: 650, w: 240, h: 40, border: '#ffffff', fill: '#0f4028' },
+            { x: 624, y: 480, w: 800, h: 36, border: '#00e676', fill: '#0f4028' }
+        ],
+        spawnP1: { x: 250, y: 880 },
+        spawnP2: { x: 1798, y: 880 }
+    },
+    volcano: {
+        name: 'LAVA VOLCANO',
+        background: '#1a0505',
+        gridColor: 'rgba(255, 61, 0, 0.12)',
+        gravity: 0.676,
+        isLavaHazard: true,
+        platforms: [
+            { x: 0, y: 1080, w: 2048, h: 72, border: '#ff3d00', fill: '#400a00' }, // Lava bottom
+            { x: 200, y: 840, w: 450, h: 40, border: '#ff9100', fill: '#260800' },
+            { x: 1398, y: 840, w: 450, h: 40, border: '#ff9100', fill: '#260800' },
+            { x: 724, y: 600, w: 600, h: 40, border: '#ff3d00', fill: '#260800' }
+        ],
+        spawnP1: { x: 300, y: 700 },
+        spawnP2: { x: 1548, y: 700 }
+    },
+    space: {
+        name: 'DEEP SPACE',
+        background: '#040010',
+        gridColor: 'rgba(213, 0, 249, 0.12)',
+        gravity: 0.38, // Low Gravity Float!
+        platforms: [
+            { x: 200, y: 980, w: 1648, h: 50, border: '#d500f9', fill: '#14002e' },
+            { x: 400, y: 680, w: 350, h: 32, border: '#00e5ff', fill: '#002033' },
+            { x: 1298, y: 680, w: 350, h: 32, border: '#00e5ff', fill: '#002033' },
+            { x: 774, y: 440, w: 500, h: 32, border: '#d500f9', fill: '#14002e' }
+        ],
+        spawnP1: { x: 350, y: 840 },
+        spawnP2: { x: 1648, y: 840 }
+    },
+    dojo: {
+        name: 'MARTIAL DOJO',
+        background: '#140c08',
+        gridColor: 'rgba(255, 171, 0, 0.09)',
+        gravity: 0.676,
+        platforms: [
+            { x: 0, y: 1060, w: 2048, h: 92, border: '#ffab00', fill: '#2e190e' },
+            { x: 250, y: 760, w: 400, h: 36, border: '#ff6d00', fill: '#2e190e' },
+            { x: 1398, y: 760, w: 400, h: 36, border: '#ff6d00', fill: '#2e190e' },
+            { x: 774, y: 500, w: 500, h: 36, border: '#ffab00', fill: '#2e190e' }
+        ],
+        spawnP1: { x: 250, y: 880 },
+        spawnP2: { x: 1798, y: 880 }
     }
 };
 
-// --- PARTICLE & PROJECTILE SYSTEM ---
+// --- PARTICLE SYSTEM ---
 class Particle {
     constructor(x, y, color, speedScale = 1.0) {
         this.x = x;
@@ -370,7 +251,74 @@ class Projectile {
     }
 }
 
-// --- PLAYER CLASS ---
+// --- SOCCER BALL BOUNCY ENTITY ---
+class SoccerBall {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.r = 28;
+        this.vx = (Math.random() - 0.5) * 8;
+        this.vy = -6;
+        this.angle = 0;
+    }
+
+    update(platforms, p1, p2) {
+        this.vy += 0.5;
+        this.x += this.vx;
+        this.y += this.vy;
+        this.angle += this.vx * 0.05;
+
+        if (this.x < this.r || this.x > CANVAS_WIDTH - this.r) {
+            this.vx *= -0.85;
+            this.x = this.x < this.r ? this.r : CANVAS_WIDTH - this.r;
+        }
+
+        for (let plat of platforms) {
+            if (this.x > plat.x - this.r && this.x < plat.x + plat.w + this.r) {
+                if (this.vy > 0 && this.y + this.r >= plat.y && this.y - this.r < plat.y + plat.h) {
+                    this.y = plat.y - this.r;
+                    this.vy *= -0.8;
+                }
+            }
+        }
+
+        // Check collision with players
+        for (let p of [p1, p2]) {
+            if (!p) continue;
+            let dist = Math.hypot(this.x - (p.x + p.width/2), this.y - (p.y + p.height/2));
+            if (dist < this.r + p.width/2) {
+                let angle = Math.atan2(this.y - (p.y + p.height/2), this.x - (p.x + p.width/2));
+                this.vx = Math.cos(angle) * 14;
+                this.vy = Math.sin(angle) * 14;
+                createHitParticles(this.x, this.y, '#ffffff', 10);
+            }
+        }
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#00e676';
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.r, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = '#111111';
+        for(let i=0; i<5; i++) {
+            let a = (i * Math.PI * 2) / 5;
+            ctx.beginPath();
+            ctx.arc(Math.cos(a) * (this.r*0.5), Math.sin(a) * (this.r*0.5), 6, 0, Math.PI*2);
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+}
+
+// --- RAGDOLL STICKMAN PLAYER CLASS ---
 class Player {
     constructor(id, x, y, charKey) {
         this.id = id;
@@ -388,6 +336,8 @@ class Player {
         
         this.vx = 0;
         this.vy = 0;
+        this.angle = 0; // Acrobatic Ragdoll Body Angle
+        this.angularVelocity = 0;
         this.isGrounded = false;
         this.facing = id === 1 ? 1 : -1;
         this.doubleJumpUsed = false;
@@ -408,7 +358,7 @@ class Player {
         this.attackBox = { x: 0, y: 0, w: 0, h: 0 };
     }
 
-    update(platforms) {
+    update(platforms, mapConfig) {
         if (this.isShielded) {
             this.shieldDuration--;
             if (this.shieldDuration <= 0) this.isShielded = false;
@@ -422,10 +372,23 @@ class Player {
             if (this.berserkDuration <= 0) this.berserkMode = false;
         }
         
-        const gravity = 0.676;
-        this.vy += gravity;
+        const currentGravity = mapConfig.gravity || 0.676;
+        this.vy += currentGravity;
         this.x += this.vx;
         
+        // Acrobatic Ragdoll Angular Physics
+        this.angle += this.angularVelocity;
+        
+        if (this.isGrounded) {
+            this.angle *= 0.72; // Auto upright recovery when on ground
+            this.angularVelocity *= 0.6;
+        } else {
+            this.angularVelocity *= 0.96;
+            if (Math.abs(this.vx) > 0.5) {
+                this.angle += this.facing * 0.03;
+            }
+        }
+
         if (this.x < 0) {
             this.x = 0;
             this.vx = 0;
@@ -450,6 +413,13 @@ class Player {
                 }
             }
         }
+
+        // Lava Hazard Collision Check
+        if (mapConfig.isLavaHazard && this.y >= 1000) {
+            this.takeDamage(1.5); // Continuous tick damage
+            this.vy = -12; // Lava bounce!
+            createHitParticles(this.x + this.width/2, 1060, '#ff3d00', 10);
+        }
         
         if (this.isAttacking) {
             this.attackTimer--;
@@ -464,10 +434,12 @@ class Player {
     jump() {
         if (this.isGrounded) {
             this.vy = -this.config.jumpForce;
+            this.angularVelocity = this.facing * 0.35; // 360 Degree Acrobatic Flip!
             this.isGrounded = false;
             createHitParticles(this.x + this.width/2, this.y + this.height, '#ffffff', 10);
         } else if (this.charKey === 'ninja' && !this.doubleJumpUsed) {
             this.vy = -this.config.jumpForce * 0.9;
+            this.angularVelocity = -this.facing * 0.45; // Reverse Flip!
             this.doubleJumpUsed = true;
             createHitParticles(this.x + this.width/2, this.y + this.height, '#00ffff', 12);
         }
@@ -488,6 +460,11 @@ class Player {
         
         this.gainUlt(dmgTaken * 0.6);
         screenShake = 16;
+        
+        // Ragdoll Impact Knockback Rotation
+        this.angularVelocity = -this.facing * 0.5;
+        this.vx = -this.facing * 6;
+        
         createHitParticles(this.x + this.width/2, this.y + this.height/2, this.config.color, 22);
     }
 
@@ -507,20 +484,10 @@ class Player {
         this.attackTimer = 14;
         
         if (this.charKey === 'swordsman' || this.charKey === 'berserker' || this.charKey === 'brawler') {
-            this.attackBox = {
-                x: this.facing === 1 ? this.x + this.width : this.x - 85,
-                y: this.y + 10,
-                w: 85,
-                h: this.height - 20
-            };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 85, y: this.y + 10, w: 85, h: this.height - 20 };
             checkMeleeHit(this, opponent, this.config.basicDamage);
         } else if (this.charKey === 'lancer') {
-            this.attackBox = {
-                x: this.facing === 1 ? this.x + this.width : this.x - 130,
-                y: this.y + 25,
-                w: 130,
-                h: 28
-            };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 130, y: this.y + 25, w: 130, h: 28 };
             checkMeleeHit(this, opponent, this.config.basicDamage);
         } else if (this.charKey === 'mage') {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
@@ -538,28 +505,13 @@ class Player {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
             projectiles.push(new Projectile(pX, this.y + 28, this.facing, 0, '#bf5af2', 9, 9, this.config.basicDamage, this.id));
         } else if (this.charKey === 'paladin') {
-            this.attackBox = {
-                x: this.facing === 1 ? this.x + this.width : this.x - 60,
-                y: this.y + 6,
-                w: 60,
-                h: this.height - 12
-            };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 60, y: this.y + 6, w: 60, h: this.height - 12 };
             checkMeleeHit(this, opponent, this.config.basicDamage);
         } else if (this.charKey === 'reaper') {
-            this.attackBox = {
-                x: this.facing === 1 ? this.x + this.width : this.x - 100,
-                y: this.y,
-                w: 100,
-                h: this.height
-            };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 100, y: this.y, w: 100, h: this.height };
             checkMeleeHit(this, opponent, this.config.basicDamage);
         } else if (this.charKey === 'vampire') {
-            this.attackBox = {
-                x: this.facing === 1 ? this.x + this.width : this.x - 75,
-                y: this.y + 12,
-                w: 75,
-                h: this.height - 24
-            };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 75, y: this.y + 12, w: 75, h: this.height - 24 };
             if (checkMeleeHit(this, opponent, this.config.basicDamage)) {
                 this.hp = Math.min(this.maxHp, this.hp + Math.round(this.config.basicDamage * 0.35));
             }
@@ -567,12 +519,7 @@ class Player {
             let pX = this.facing === 1 ? this.x + this.width + 15 : this.x - 20;
             projectiles.push(new Projectile(pX, this.y + 20, this.facing, -0.15, '#30d158', 8, 11, this.config.basicDamage, this.id));
         } else if (this.charKey === 'rogue') {
-            this.attackBox = {
-                x: this.facing === 1 ? this.x + this.width : this.x - 65,
-                y: this.y + 18,
-                w: 65,
-                h: this.height - 36
-            };
+            this.attackBox = { x: this.facing === 1 ? this.x + this.width : this.x - 65, y: this.y + 18, w: 65, h: this.height - 36 };
             checkMeleeHit(this, opponent, this.config.basicDamage);
         }
         
@@ -587,6 +534,7 @@ class Player {
 
         if (this.charKey === 'swordsman') {
             this.vx = this.facing * 20;
+            this.angularVelocity = this.facing * 0.4;
             this.isAttacking = true;
             this.attackTimer = 18;
             this.attackBox = { x: this.x - 25, y: this.y, w: this.width + 50, h: this.height };
@@ -614,6 +562,7 @@ class Player {
         else if (this.charKey === 'lancer') {
             this.vy = -this.config.jumpForce * 1.35;
             this.vx = this.facing * 9;
+            this.angularVelocity = this.facing * 0.5;
             createHitParticles(this.x + this.width/2, this.y + this.height, '#5ac8fa', 20);
         } 
         else if (this.charKey === 'berserker') {
@@ -629,6 +578,7 @@ class Player {
             let oldX = this.x;
             this.x = opponent.x - opponent.facing * 90;
             this.facing = opponent.facing;
+            this.angularVelocity = this.facing * 0.6;
             createHitParticles(oldX + this.width/2, this.y + this.height/2, '#8e8e93', 20);
             createHitParticles(this.x + this.width/2, this.y + this.height/2, '#ff2d55', 20);
             opponent.takeDamage(this.config.specialDamage);
@@ -681,6 +631,7 @@ class Player {
                 setTimeout(() => {
                     this.x = opponent.x + (Math.random() - 0.5) * 160;
                     this.y = opponent.y - 20;
+                    this.angularVelocity = (Math.random() - 0.5) * 0.8;
                     opponent.takeDamage(this.config.ultDamage / 7);
                     createHitParticles(opponent.x + opponent.width/2, opponent.y + opponent.height/2, '#ff2d55', 20);
                 }, i * 140);
@@ -711,6 +662,7 @@ class Player {
         } 
         else if (this.charKey === 'lancer') {
             this.vy = -28;
+            this.angularVelocity = this.facing * 0.6;
             setTimeout(() => {
                 this.vy = 34;
                 let checkLand = setInterval(() => {
@@ -826,7 +778,7 @@ class Player {
         document.getElementById(`p${this.id}-ult`).style.width = `${this.ultGauge}%`;
     }
 
-    // --- PURE FLAT STICKMAN DRAWING ENGINE (Scales with 2K Arena) ---
+    // --- ACROBATIC RAGDOLL STICKMAN DRAWING ENGINE ---
     draw(ctx) {
         if (this.isInvisible) {
             ctx.save();
@@ -834,11 +786,12 @@ class Player {
         }
 
         ctx.save();
-        const pX = this.x;
-        const pY = this.y;
-        const w = this.width;
-        const h = this.height;
-        const centerX = pX + w / 2;
+        const centerX = this.x + this.width / 2;
+        const centerY = this.y + this.height / 2;
+
+        // Apply Ragdoll Body Rotation Transform!
+        ctx.translate(centerX, centerY);
+        ctx.rotate(this.angle);
 
         const charColor = this.config.color;
         
@@ -848,59 +801,82 @@ class Player {
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        // 1. 머리
+        // Relative local coordinates
         const headRadius = 20;
-        const headY = pY + headRadius + 3;
+        const headY = -this.height/2 + headRadius + 3;
+        const neckY = headY + headRadius;
+        const pelvisY = this.height/2 - 26;
+
+        // 1. Head (Solid circle + Head accessory/goggles)
         ctx.beginPath();
-        ctx.arc(centerX, headY, headRadius, 0, Math.PI * 2);
+        ctx.arc(0, headY, headRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // 2. 몸통
-        const neckY = headY + headRadius;
-        const pelvisY = pY + h - 26;
+        // Goggles/Headset Accessory (matching reference image)
+        ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.moveTo(centerX, neckY);
-        ctx.lineTo(centerX, pelvisY);
+        ctx.arc(this.facing * 8, headY - 2, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Spine Body
+        ctx.beginPath();
+        ctx.moveTo(0, neckY);
+        ctx.lineTo(0, pelvisY);
         ctx.stroke();
 
-        // 3. 다리
+        // 3. Legs + Boots (matching reference image shoes!)
         let legOffset = Math.sin(Date.now() * 0.018) * (Math.abs(this.vx) > 0.1 ? 16 : 3);
         if (!this.isGrounded) legOffset = 14;
 
-        // 왼다리
+        // Left Leg
+        let lKneeX = -12 - legOffset * 0.5;
+        let lKneeY = pelvisY + 14;
+        let lFootX = -15 - legOffset;
+        let lFootY = this.height/2;
+
         ctx.beginPath();
-        ctx.moveTo(centerX, pelvisY);
-        ctx.lineTo(centerX - 12 - legOffset * 0.5, pelvisY + 14);
-        ctx.lineTo(centerX - 15 - legOffset, pY + h);
+        ctx.moveTo(0, pelvisY);
+        ctx.lineTo(lKneeX, lKneeY);
+        ctx.lineTo(lFootX, lFootY);
         ctx.stroke();
 
-        // 오른다리
+        // Right Leg
+        let rKneeX = 12 + legOffset * 0.5;
+        let rKneeY = pelvisY + 14;
+        let rFootX = 15 + legOffset;
+        let rFootY = this.height/2;
+
         ctx.beginPath();
-        ctx.moveTo(centerX, pelvisY);
-        ctx.lineTo(centerX + 12 + legOffset * 0.5, pelvisY + 14);
-        ctx.lineTo(centerX + 15 + legOffset, pY + h);
+        ctx.moveTo(0, pelvisY);
+        ctx.lineTo(rKneeX, rKneeY);
+        ctx.lineTo(rFootX, rFootY);
         ctx.stroke();
 
-        // 4. 팔 및 무기
+        // Chunky Boots (Ref Image Red/Blue Shoes)
+        ctx.fillStyle = this.id === 1 ? '#ff0055' : '#007aff';
+        ctx.fillRect(lFootX - 10, lFootY - 14, 18, 14);
+        ctx.fillRect(rFootX - 8, rFootY - 14, 18, 14);
+
+        // 4. Arms
         const shoulderY = neckY + 8;
-        const handX = centerX + this.facing * 26;
+        const handX = this.facing * 26;
         const handY = shoulderY + (this.isAttacking ? -6 : 12);
 
-        // 뒷팔
+        // Back Arm
         ctx.beginPath();
-        ctx.moveTo(centerX, shoulderY);
-        ctx.lineTo(centerX - this.facing * 12, shoulderY + 12);
-        ctx.lineTo(centerX - this.facing * 20, shoulderY + 24);
+        ctx.moveTo(0, shoulderY);
+        ctx.lineTo(-this.facing * 12, shoulderY + 12);
+        ctx.lineTo(-this.facing * 20, shoulderY + 24);
         ctx.stroke();
 
-        // 앞팔
+        // Front Arm
         ctx.beginPath();
-        ctx.moveTo(centerX, shoulderY);
-        ctx.lineTo(centerX + this.facing * 14, shoulderY + (this.isAttacking ? -9 : 6));
+        ctx.moveTo(0, shoulderY);
+        ctx.lineTo(this.facing * 14, shoulderY + (this.isAttacking ? -9 : 6));
         ctx.lineTo(handX, handY);
         ctx.stroke();
 
-        // 5. 플랫 스틱맨 무기
+        // 5. Weapon
         ctx.save();
         ctx.shadowColor = charColor;
         ctx.shadowBlur = 12;
@@ -946,26 +922,27 @@ class Player {
             ctx.strokeStyle = '#ff0055';
             ctx.lineWidth = 6;
             ctx.beginPath();
-            ctx.moveTo(centerX - this.facing * 14, headY);
-            ctx.lineTo(centerX - this.facing * 34, headY + 12);
+            ctx.moveTo(-this.facing * 14, headY);
+            ctx.lineTo(-this.facing * 34, headY + 12);
             ctx.stroke();
         }
 
         ctx.restore();
 
-        // 6. 특수 효과
+        // 6. Shield / Special Effects
         if (this.isShielded) {
             ctx.strokeStyle = '#00ffff';
             ctx.lineWidth = 6;
             ctx.beginPath();
-            ctx.arc(centerX, headY + 20, 48, 0, Math.PI*2);
+            ctx.arc(0, headY + 20, 48, 0, Math.PI*2);
             ctx.stroke();
         }
+
+        ctx.restore();
 
         if (this.isInvisible) {
             ctx.restore();
         }
-        ctx.restore();
     }
 }
 
@@ -977,7 +954,6 @@ function checkMeleeHit(attacker, defender, damage) {
         attacker.attackBox.y + attacker.attackBox.h > defender.y) {
         
         defender.takeDamage(damage);
-        defender.vx = attacker.facing * 8; 
         return true;
     }
     return false;
@@ -1059,6 +1035,12 @@ function initGame() {
     
     projectiles = [];
     particles = [];
+    soccerBalls = [];
+
+    if (mapKey === 'soccer') {
+        soccerBalls.push(new SoccerBall(CANVAS_WIDTH / 2, 400));
+    }
+    
     gameTimer = 99;
     document.getElementById('timer').textContent = gameTimer;
 
@@ -1169,15 +1151,12 @@ function handleInputs() {
         player2.jump();
         keys['ArrowUp'] = false;
     }
-    // Basic Attack: .
     if (keys['.'] || keys['>']) {
         player2.useBasicAttack(player1);
     }
-    // Special Skill: /
     if (keys['/'] || keys['?']) {
         player2.useSpecialSkill(player1);
     }
-    // Ultimate: Shift
     if (keys['Shift'] || keys['shift']) {
         player2.useUltimate(player1);
     }
@@ -1188,12 +1167,17 @@ function gameLoop() {
     if (currentGameState === STATE.PLAYING) {
         handleInputs();
         
-        player1.update(activeMap.platforms);
-        player2.update(activeMap.platforms);
+        player1.update(activeMap.platforms, activeMap);
+        player2.update(activeMap.platforms, activeMap);
 
         if (activeMap === MAPS.sky) {
             if (player1.y > CANVAS_HEIGHT) player1.takeDamage(999);
             if (player2.y > CANVAS_HEIGHT) player2.takeDamage(999);
+        }
+
+        // Update Soccer Balls if Soccer Stadium Map
+        for (let ball of soccerBalls) {
+            ball.update(activeMap.platforms, player1, player2);
         }
 
         // Update Projectiles
@@ -1281,6 +1265,11 @@ function gameLoop() {
             ctx.lineWidth = 4.5;
             ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
             ctx.restore();
+        }
+
+        // Render Soccer Balls
+        for (let ball of soccerBalls) {
+            ball.draw(ctx);
         }
 
         // Render Entities
